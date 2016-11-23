@@ -1,0 +1,31 @@
+%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase.js"}
+%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-app.js"}
+%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-auth.js"}
+%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-database.js"}
+%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-messaging.js"}
+%script{:src=> "script/jquery-3.1.1.min.js", :type=> "text/javascript"}
+%script{:src=> "script/index.js", :type=> "text/javascript"}
+
+
+/		%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-storage.js"}
+
+%div{:id=> "login_page"}
+	%input{:id=> "partyname", :type=> "text", :placeholder=> "Enter the party's name"}
+	%br
+	%input{:id=> "partypass", :type=> "text", :placeholder=> "Enter password"}
+	%br
+	%input{:id=> "username", :type=> "text", :placeholder=> "Enter your username"}
+	%br
+	%button{:onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())"}
+		Create or join party!
+
+%div{:id=> "main_page", :hidden=> true}
+	%div{:id=> "up_next"}
+		%strong
+			Up Next:
+	%div{:id=> "my_playlist"}
+		%strong
+			My Playlist:
+		%table{:id=> "list_songs"}
+	%input{:id=> "search_song", :type=> "text", :placeholder=> "Song to add"}
+	%button{:id=> "search_song_button", :onclick=> "add_song($('#search_song').val())"}Add

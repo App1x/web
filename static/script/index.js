@@ -49,6 +49,10 @@ var Guest= function(guestName) {
 	this.headSongName= null;
 }
 
+function songListItem(song) {
+	return "<tr><td>"+song.songName+"</td><tr>"
+}
+
 function show_login_page() {
 	$("#main_page").hide();
 	$("#login_page").show();
@@ -62,7 +66,8 @@ function show_main_page() {
 function leave_party() {
 	// console.log("leave")
 	this.myStuff.remove();
-	$("#list_songs").html("")
+	$("#list_my_songs").html("")
+	$("#list_next_songs").html("")
 
 	var party= null;
 	var guestList= null;
@@ -74,6 +79,17 @@ function leave_party() {
 
 function shut_party_down() {
 	this.party.remove();
+}
+
+function findHead(linkedList, prevText) {
+	var head= null;
+	$.each(linkedList, function(index, node) {
+		if (node[prevText]==null) {
+			head= node;
+		}
+		return false;
+	})
+	return head;
 }
 
 function create_or_join_party(partyName, password, guestName) {
@@ -104,50 +120,41 @@ function create_or_join_party(partyName, password, guestName) {
 
 			//update my playlist
 			myPlaylist.on('value', function(data) {
-				if (data) {
+				// if (data) {
 					var songs= data.val();
-					console.log(songs);
 					list_html= [];
 
-					$.each(songs, function(index, song) {
-						if (song.previousSongName==null) {
-							var currentSong= song;
-							do {
-								list_html.push("<tr><td>"+currentSong.songName+"</td><tr>");
-								var nextSongName= currentSong.nextSongName;
-								currentSong= songs[nextSongName];
-							} while (currentSong!=null)
-							return false;
-						}
-					})
+					var currentSong= findHead(songs);
+					do {
+						list_html.push(songListItem(currentSong));
+						var nextSongName= currentSong.nextSongName;
+						currentSong= songs[nextSongName];
+					} while (currentSong!=null)
 					
-					$("#list_songs").html(list_html.join("\n"));
-				}
+					$("#list_my_songs").html(list_html.join("\n"));
+				// }
 			})
 
-			//shut down party if empty
 			guestList.on('value', function(data) {
-				guestList.once('value', function(guest_list) {
-					var partySize= guest_list.numChildren();
+				guestList.once('value', function(guestListRef) {
+					var partySize= guestListRef.numChildren();  //shut down party if empty
 					if (partySize===0) {
 						party.remove();
 					}
+
+					list_html= [];
+					var guest_list= guestListRef.val();
+					var currentGuest= findHead(guest_list);
+					do {
+						nextSong= findHead(currentGuest.playlist);
+						list_html.push(songListItem(nextSong));
+						var nextGuestName= currentGuest.nextGuestName;
+						currentGuest= guest_list[nextGuestName];
+					} while (currentGuest!=null)
+
+					$("#list_next_songs").html(list_html.join("\n"));
 				});
 			})
-
-			// //update guestOrder
-			// 	party.transaction(function(party_info) {
-			// 		if (party_info) {
-			// 			partySize= -1;
-			// 			guestList.once("value", function(guest_list) {
-			// 				partySize= guest_list.numChildren();
-			// 			});
-			// 			party_info.guestOrder= partySize;
-
-			// 		}
-			// 		return party_info;
-			// 	})
-			// })
 
 			show_main_page();
 		}

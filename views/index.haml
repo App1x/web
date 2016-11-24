@@ -24,9 +24,10 @@
 	%div{:id=> "up_next"}
 		%strong
 			Up Next:
+		%table{:id=> "list_next_songs"}
 	%div{:id=> "my_playlist"}
 		%strong
 			My Playlist:
-		%table{:id=> "list_songs"}
+		%table{:id=> "list_my_songs"}
 	%input{:id=> "search_song", :type=> "text", :placeholder=> "Song to add"}
 	%button{:id=> "search_song_button", :onclick=> "add_song($('#search_song').val())"}Add

@@ -154,13 +154,26 @@ function show_main_page() {
 	$("#main_page").show();
 }
 
+// function shut_down_party() {
+// 	console.log(party.toString());
+// 	firebase.database().ref('parties/a').remove();
+// }
+
 function leave_party() {
 	var name= this.myName;
 	this.guestList.transaction(function(guest_list) {
 		return removeNode(guest_list, guest_list[name]);
+	}).then(function(data) {
+		var partySize= data.snapshot.numChildren();  //shut down party if empty
+		if (partySize===0) {
+			this.party.remove();
+		}
 	})
 	$("#list_my_songs").html("")
 	$("#list_next_songs").html("")
+
+	this.myPlaylist.off('value');
+	this.guestList.off('value');
 
 	var party= null;
 	var guestList= null;
@@ -221,10 +234,10 @@ function create_or_join_party(partyName, password, guestName) {
 
 			guestList.on('value', function(data) {
 				guestList.once('value', function(guestListRef) {
-					var partySize= guestListRef.numChildren();  //shut down party if empty
-					if (partySize===0) {
-						party.remove();
-					}
+					// var partySize= guestListRef.numChildren();  //shut down party if empty
+					// if (partySize===0) {
+					// 	party.remove();
+					// }
 
 					list_html= [];
 					var guest_list= guestListRef.val();

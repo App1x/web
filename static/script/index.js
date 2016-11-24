@@ -36,13 +36,31 @@ firebase.auth().onAuthStateChanged(function(user) {
 //   // ...
 // });
 
+function show_login_page() {
+	$("#main_page").hide();
+	$("#login_page").show();
+}
+
 function show_main_page() {
 	$("#login_page").hide();
 	$("#main_page").show();
 }
 
-function leave_party(username) {
-	guestList.child(username).remove();
+function leave_party() {
+	// console.log("leave")
+	this.myStuff.remove();
+	$("#list_songs").html("")
+	
+	var party= null;
+	var guestList= null;
+	var myUsername= null;
+	var myStuff= null;
+	var myPlaylist= null;
+	show_login_page();
+}
+
+function shut_party_down() {
+	this.party.remove();
 }
 
 function create_or_join_party(partyName, password, username) {
@@ -60,6 +78,9 @@ function create_or_join_party(partyName, password, username) {
 			// console.log("join");
 			if (party.password===password) {  //bounce these fools
 				// console.log("pass matches");
+				if (party.guestList==null) {
+					party.guestList= {};
+				}
 				if (party.guestList[username]==null) {
 					// console.log("new guest")
 					new_user.order= ++party.guestOrder;
@@ -88,10 +109,42 @@ function create_or_join_party(partyName, password, username) {
 			myPlaylist= myStuff.child('playlist');
 
 			//update my playlist
-			myPlaylist.on('child_added', function(data) {
-				console.log(data.val());
-				$("#list_songs").append("<tr><td>"+data.val().songName+"</td><tr>");
+			myPlaylist.on('value', function(data) {
+				// console.log(data.val());
+				// $("#list_songs").append("<tr><td>"+data.val().songName+"</td><tr>");
+				if (data.val()) {
+					list_html= [];
+					data.val().forEach(function(song) {
+						// console.log(song.key);
+						list_html[song.order]= ("<tr><td>"+song.songName+"</td><tr>");
+					});
+					$("#list_songs").html(list_html.join("\n"));
+				}
 			})
+
+			//update guestOrder
+			guestList.on('value', function(data) {
+				guestList.once("value", function(guest_list) {
+					var partySize= guest_list.numChildren();
+					if (partySize===0) {
+						party.remove();
+					}
+				});
+			})
+
+
+			// 	party.transaction(function(party_info) {
+			// 		if (party_info) {
+			// 			partySize= -1;
+			// 			guestList.once("value", function(guest_list) {
+			// 				partySize= guest_list.numChildren();
+			// 			});
+			// 			party_info.guestOrder= partySize;
+
+			// 		}
+			// 		return party_info;
+			// 	})
+			// })
 
 			show_main_page();
 		}
@@ -101,6 +154,7 @@ function create_or_join_party(partyName, password, username) {
 function add_song(songName) {
 
 	var new_song= {
+		order: 1,
 		songName: songName
 	}
 	// myPlaylist.push(new_song);
@@ -112,27 +166,15 @@ function add_song(songName) {
 			console.log(stuff);
 			console.log(stuff.playlist);
 			if (stuff.playlist==null) {
-				console.log('does not have playlist')
+				// console.log('does not have playlist')
 				stuff.playlist= {};
-				console.log(stuff);
+				// console.log(stuff);
 			}
-			stuff.playlist[++stuff.nextSongOrder]= new_song
+			new_song.order= ++stuff.nextSongOrder
+			stuff.playlist[new_song.order]= new_song
 		}
 		return stuff;
 	})
-	// }).then(function(snapshot) {  //actually add the songs
-	// 	myPlaylist.push(new_song);
-	// 	$("#search_song").val("");
-	// 	myPlaylist.transaction(function(list) {
-	// 		new_list_html= []
-	// 		list.val().forEach(function(song) {
-	// 			console.log(song);
-	// 			new_list_html[song.val().order]= "<tr><td>"+song.val().songName+"</td><tr>";
-	// 		})
-	// 		// myShownPlaylist= $("#list_songs")
-	// 		$("#list_songs").html(new_list_html.join(""));
-	// 	})
-	// })
 }
 
 

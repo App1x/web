@@ -9,7 +9,7 @@ firebase.initializeApp(config);
 var parties= firebase.database().ref('parties');
 var party= null;
 var guestList= null;
-var myUsername= null;
+var myName= null;
 var myStuff= null;
 var myPlaylist= null;
 
@@ -24,7 +24,7 @@ firebase.auth().onAuthStateChanged(function(user) {
     // User is signed out.
     console.log('logged out');
     // ...
-    leave_party(myUsername);
+    leave_party(myName);
   }
   // ...
 });
@@ -35,6 +35,19 @@ firebase.auth().onAuthStateChanged(function(user) {
 //   var errorMessage = error.message;
 //   // ...
 // });
+
+var Song= function(songName) {
+	this.nextSongName= null;
+	this.previousSongName= null;
+	this.songName= songName;
+}
+
+var Guest= function(guestName) {
+	this.guestName= guestName;
+	this.nextGuestName= null;
+	this.previousGuestName= null;
+	this.headSongName= null;
+}
 
 function show_login_page() {
 	$("#main_page").hide();
@@ -50,10 +63,10 @@ function leave_party() {
 	// console.log("leave")
 	this.myStuff.remove();
 	$("#list_songs").html("")
-	
+
 	var party= null;
 	var guestList= null;
-	var myUsername= null;
+	var myName= null;
 	var myStuff= null;
 	var myPlaylist= null;
 	show_login_page();
@@ -63,68 +76,104 @@ function shut_party_down() {
 	this.party.remove();
 }
 
-function create_or_join_party(partyName, password, username) {
+function create_or_join_party(partyName, password, guestName) {
 
 	var got_in= true
+	// console.log(partyName);
 	parties.child(partyName).transaction(function(party) {
 
-		var new_user= {
-			order: 1,
-			nextSongOrder: 0
-		}
+		// if (party) {  //join party
+		// 	// console.log("join");
+		// 	if (party.password===password) {  //only continue if party password matches (bounce these fools)
+		// 		// console.log("pass matches");
+		// 		if (party.guestList==null) {
+		// 			party.guestList= {};
+		// 		}
+		// 		if (party.guestList[username]==null) {  //if this guest is not already in the party
+		// 			// console.log("new guest")
+		// 			// new_user.order= ++party.guestOrder;
+		// 			newGuest= new Guest();
+		// 			party.guestList[username]= new Guest();
+		// 			party.headGuest= username;
+		// 		}
+		// 	} else {
+		// 		// console.log("pass doesn't match");
+		// 		$('#partyname').val("");
+		// 		$('#partyname').attr("placeholder", "Party name already exists");
+		// 		got_in= false;
+		// 	}
+		// 	console.log(party);
+		// } else {  //create party
+		// 	console.log("create");
+
+		// 	newGuest= new Guest();
+		// 	party= {guestList: {}, headGuest: null, password: password};
+		// 	party.guestList[username]= newGuest;
+		// 	party.headGuest= newGuest;
+		// 	// console.log(party);
+		// }
+
+		// console.log(party);
+		// return party;
 
 		// console.log("party: "+party);
-		if (party) {  //join party
-			// console.log("join");
-			if (party.password===password) {  //bounce these fools
-				// console.log("pass matches");
-				if (party.guestList==null) {
-					party.guestList= {};
-				}
-				if (party.guestList[username]==null) {
-					// console.log("new guest")
-					new_user.order= ++party.guestOrder;
-					party.guestList[username]= new_user;
-				}
-			} else {
-				// console.log("pass doesn't match");
+		if (party) {
+			if (party.password!==password) {  //abort if password doesn't match
 				$('#partyname').val("");
 				$('#partyname').attr("placeholder", "Party name already exists");
-				// got_in= false;
+				return;
 			}
-		} else {  //create party
-			// console.log("create");
-
-			party= {guestOrder: 1, guestList: {}, password: password};
-			party.guestList[username]= new_user;
+		} else {
+			party= {guestList: {}, headGuestName: guestName, password: password};  //create new party
 		}
 
+		// if (party.guestList[guestName]==null) {
+		party.guestList[guestName]= party.guestList[guestName] || new Guest(guestName);
+		// }
+
+		// console.log(party);
 		return party;
 	}, function(error, committed, snapshot) {
+		console.log(committed);
 		if (got_in) {
+			myName= guestName;
 			party= parties.child(partyName);
 			guestList= party.child('guestList');
-			myUsername= username;
-			myStuff= guestList.child(username);
+			myStuff= guestList.child(guestName);
 			myPlaylist= myStuff.child('playlist');
 
 			//update my playlist
 			myPlaylist.on('value', function(data) {
 				// console.log(data.val());
 				// $("#list_songs").append("<tr><td>"+data.val().songName+"</td><tr>");
-				if (data.val()) {
+				if (data) {
+					var songs= data.val();
+					console.log(songs);
 					list_html= [];
-					data.val().forEach(function(song) {
-						// console.log(song.key);
-						list_html[song.order]= ("<tr><td>"+song.songName+"</td><tr>");
-					});
+
+					$.each(songs, function(index, song) {
+						if (song.previousSongName==null) {
+							var currentSong= song;
+							do {
+								list_html.push("<tr><td>"+currentSong.songName+"</td><tr>");
+								var nextSongName= currentSong.nextSongName;
+								currentSong= songs[nextSongName];
+							} while (currentSong!=null)
+							return false;
+						}
+					})
+					
+					// data.val().forEach(function(song) {
+					// 	// console.log(song.key);
+					// 	list_html.push("<tr><td>"+song.songName+"</td><tr>");
+					// });
 					$("#list_songs").html(list_html.join("\n"));
 				}
 			})
 
-			//update guestOrder
+			//shut down party if empty
 			guestList.on('value', function(data) {
-				guestList.once("value", function(guest_list) {
+				guestList.once('value', function(guest_list) {
 					var partySize= guest_list.numChildren();
 					if (partySize===0) {
 						party.remove();
@@ -132,7 +181,7 @@ function create_or_join_party(partyName, password, username) {
 				});
 			})
 
-
+			// //update guestOrder
 			// 	party.transaction(function(party_info) {
 			// 		if (party_info) {
 			// 			partySize= -1;
@@ -153,27 +202,42 @@ function create_or_join_party(partyName, password, username) {
 
 function add_song(songName) {
 
-	var new_song= {
-		order: 1,
-		songName: songName
-	}
+	// var new_song= {
+	// 	order: 1,
+	// 	songName: songName
+	// }
 	// myPlaylist.push(new_song);
 
-	myStuff.transaction(function(stuff) {  //update nextSongOrder
+	myStuff.transaction(function(guest) {
 		// console.log(guestList.child(myUsername).toString());
 		// console.log(stuff);
-		if (stuff) {
-			console.log(stuff);
-			console.log(stuff.playlist);
-			if (stuff.playlist==null) {
+		if (guest) {
+			var newSong= new Song(songName);
+			// console.log(stuff);
+			// console.log(stuff.playlist);
+			if (guest.playlist==null) {
 				// console.log('does not have playlist')
-				stuff.playlist= {};
+				guest.playlist= {};
 				// console.log(stuff);
+				guest.headSongName= songName;
+			} else {
+				// var endSongName= null;
+				myPlaylist.transaction(function(data) {  //attach song to tail of linked list
+					console.log(data);
+					if (data) {
+						$.each(data, function(index, song) {
+							if (song.nextSongName==null) {
+								guest.playlist[song.songName].nextSongName= songName
+								newSong.previousSongName= song.songName;
+							}
+						});
+					}
+					return data;
+				})
 			}
-			new_song.order= ++stuff.nextSongOrder
-			stuff.playlist[new_song.order]= new_song
+			guest.playlist[songName]= newSong;
 		}
-		return stuff;
+		return guest;
 	})
 }
 

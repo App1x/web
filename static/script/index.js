@@ -36,21 +36,112 @@ firebase.auth().onAuthStateChanged(function(user) {
 //   // ...
 // });
 
-var Song= function(songName) {
-	this.nextSongName= null;
-	this.previousSongName= null;
-	this.songName= songName;
+// var Song= function(songName) {
+// 	this.next= null;
+// 	this.previous= null;
+// 	this.songName= songName;
+// }
+
+// var Guest= function(guestName) {
+// 	this.next= null;
+// 	this.previous= null;
+// 	this.guestName= guestName;
+// 	this.headSongName= null;
+// }
+
+//class Node
+var Node= function(id) {
+	this.next= null;
+	this.previous= null;
+	this.id= id;
 }
 
-var Guest= function(guestName) {
-	this.guestName= guestName;
-	this.nextGuestName= null;
-	this.previousGuestName= null;
-	this.headSongName= null;
+function findHead(linkedList) {
+	var head= null;
+	$.each(linkedList, function(index, node) {
+		if (node.prev==null) {
+			head= node;
+			return false;
+		}
+	})
+	return head;
 }
+
+function findTail(linkedList) {
+	var tail= null;
+	$.each(linkedList, function(index, node) {
+		if (node.next==null) {
+			tail= node;
+			return false;
+		}
+	})
+	return tail;
+}
+
+function isEmpty(abc) {
+    for(var prop in abc) {
+        if(abc.hasOwnProperty(prop))
+            return false;
+    }
+    return true;
+}
+
+function insertNode(linkedList, node, position) {
+	if (linkedList==null || isEmpty(linkedList)) {
+		var linkedList= {};
+		linkedList[node.id]= node;
+		return linkedList;
+	}
+
+	if (position==="start" || position==="beginning") {
+		var headNode= findHead(linkedList);
+		// if (headNode!=null) {
+			headNode.prev= node.id;
+			node.next= headNode.id;
+		// }
+	} else if (position==="end") {
+		var endNode= findTail(linkedList);
+		// if (endNode!=null) {
+			endNode.next= node.id;
+			node.prev= endNode.id;
+		// }
+	} else {
+		var currentNode= findHead(linkedList);
+		var index= 0;
+		// if (currentNode!=null) {
+			while (currentNode.next!=null && index<position) {
+				currentNode= linkedList[currentNode.next];
+			}
+			node.next= currentNode.next;
+			currentNode.next= node.id;
+			node.prev= currentNode.id;
+		// }
+	}
+	linkedList[node.id]= node;
+	return linkedList;
+}
+
+function removeNode(linkedList, node) {
+	if (linkedList==null || isEmpty(linkedList)) {
+		return linkedList;
+	}
+
+	var currentNode= findHead(linkedList);
+	while (currentNode!=null) {
+		if (currentNode===node) {
+			if (node.prev!=null) linkedList[node.prev].next= node.next || null;
+			if (node.next!=null) linkedList[node.next].prev= node.prev || null;
+			linkedList[node.id]= null;
+			break;
+		}
+		currentNode= linkedList[currentNode.next];
+	}
+	return linkedList;
+}
+//end class Node
 
 function songListItem(song) {
-	return "<tr><td>"+song.songName+"</td><tr>"
+	return "<tr><td>"+song.id+"</td><tr>"
 }
 
 function show_login_page() {
@@ -64,8 +155,10 @@ function show_main_page() {
 }
 
 function leave_party() {
-	// console.log("leave")
-	this.myStuff.remove();
+	var name= this.myName;
+	this.guestList.transaction(function(guest_list) {
+		return removeNode(guest_list, guest_list[name]);
+	})
 	$("#list_my_songs").html("")
 	$("#list_next_songs").html("")
 
@@ -81,21 +174,11 @@ function shut_party_down() {
 	this.party.remove();
 }
 
-function findHead(linkedList, prevText) {
-	var head= null;
-	$.each(linkedList, function(index, node) {
-		if (node[prevText]==null) {
-			head= node;
-		}
-		return false;
-	})
-	return head;
-}
-
 function create_or_join_party(partyName, password, guestName) {
 
 	var got_in= true
 	parties.child(partyName).transaction(function(party) {
+		// newGuest= new Node(guestName);
 		if (party) {
 			if (party.password!==password) {  //abort if password doesn't match
 				$('#partyname').val("");
@@ -103,14 +186,15 @@ function create_or_join_party(partyName, password, guestName) {
 				return;
 			}
 		} else {
-			party= {guestList: {}, headGuestName: guestName, password: password};  //create new party
+			party= {guestList: {}, password: password};  //create new party
 		}
 
-		party.guestList[guestName]= party.guestList[guestName] || new Guest(guestName);
+		if (party.guestList[guestName]==null) {
+			party.guestList= insertNode(party.guestList, new Node(guestName), "end");
+		}
 
 		return party;
 	}, function(error, committed, snapshot) {
-		console.log(committed);
 		if (got_in) {
 			myName= guestName;
 			party= parties.child(partyName);
@@ -125,11 +209,11 @@ function create_or_join_party(partyName, password, guestName) {
 					list_html= [];
 
 					var currentSong= findHead(songs);
-					do {
+					while (currentSong!=null) {
 						list_html.push(songListItem(currentSong));
-						var nextSongName= currentSong.nextSongName;
+						var nextSongName= currentSong.next;
 						currentSong= songs[nextSongName];
-					} while (currentSong!=null)
+					}
 					
 					$("#list_my_songs").html(list_html.join("\n"));
 				// }
@@ -145,12 +229,14 @@ function create_or_join_party(partyName, password, guestName) {
 					list_html= [];
 					var guest_list= guestListRef.val();
 					var currentGuest= findHead(guest_list);
-					do {
-						nextSong= findHead(currentGuest.playlist);
-						list_html.push(songListItem(nextSong));
-						var nextGuestName= currentGuest.nextGuestName;
+					while (currentGuest!=null) {
+						var nextSong= findHead(currentGuest.playlist);
+						if (nextSong) {
+							list_html.push(songListItem(nextSong));
+						}
+						var nextGuestName= currentGuest.next;
 						currentGuest= guest_list[nextGuestName];
-					} while (currentGuest!=null)
+					}
 
 					$("#list_next_songs").html(list_html.join("\n"));
 				});
@@ -165,25 +251,8 @@ function add_song(songName) {
 
 	myStuff.transaction(function(guest) {
 		if (guest) {
-			var newSong= new Song(songName);
-			if (guest.playlist==null) {
-				guest.playlist= {};
-				guest.headSongName= songName;
-			} else {
-				myPlaylist.transaction(function(data) {  //attach song to tail of linked list
-					console.log(data);
-					if (data) {
-						$.each(data, function(index, song) {
-							if (song.nextSongName==null) {
-								guest.playlist[song.songName].nextSongName= songName
-								newSong.previousSongName= song.songName;
-							}
-						});
-					}
-					return data;
-				})
-			}
-			guest.playlist[songName]= newSong;
+			var newSong= new Node(songName);
+			guest.playlist= insertNode(guest.playlist, newSong, "end");
 		}
 		return guest;
 	})

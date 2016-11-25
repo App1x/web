@@ -82,27 +82,21 @@ function insertNode(linkedList, node, position) {
 
 	if (position==="start" || position==="beginning") {
 		var headNode= findHead(linkedList);
-		// if (headNode!=null) {
-			headNode.prev= node.id;
-			node.next= headNode.id;
-		// }
+		headNode.prev= node.id;
+		node.next= headNode.id;
 	} else if (position==="end") {
 		var endNode= findTail(linkedList);
-		// if (endNode!=null) {
-			endNode.next= node.id;
-			node.prev= endNode.id;
-		// }
+		endNode.next= node.id;
+		node.prev= endNode.id;
 	} else {
 		var currentNode= findHead(linkedList);
 		var index= 0;
-		// if (currentNode!=null) {
-			while (currentNode.next!=null && index<position) {
-				currentNode= linkedList[currentNode.next];
-			}
-			node.next= currentNode.next;
-			currentNode.next= node.id;
-			node.prev= currentNode.id;
-		// }
+		while (currentNode.next!=null && index<position) {
+			currentNode= linkedList[currentNode.next];
+		}
+		node.next= currentNode.next;
+		currentNode.next= node.id;
+		node.prev= currentNode.id;
 	}
 	linkedList[node.id]= node;
 	return linkedList;
@@ -126,19 +120,6 @@ function removeNode(linkedList, node) {
 	return linkedList;
 }
 //end class Node
-
-// function trackListElement(track) {
-// 	var nameElement= jQuery('<span/>', {
-// 	    class: "track_name",
-// 	    text: track.trackName
-// 	});
-
-// 	var artistElement= jQuery('<span/>', {
-// 		class: "track_artist",
-// 		text: track.trackArtist
-// 	});
-// 	return nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML')
-// }
 
 //class Song
 function Track(trackUri, trackName, trackArtist) {
@@ -170,11 +151,6 @@ function show_main_page() {
 	$("#login_page").hide();
 	$("#main_page").show();
 }
-
-// function shut_down_party() {
-// 	console.log(party.toString());
-// 	firebase.database().ref('parties/a').remove();
-// }
 
 function leave_party() {
 	var name= this.myName;
@@ -208,7 +184,6 @@ function create_or_join_party(partyName, password, guestName) {
 
 	var got_in= true
 	parties.child(partyName).transaction(function(party) {
-		// newGuest= new Node(guestName);
 		if (party) {
 			if (party.password!==password) {  //abort if password doesn't match
 				$('#partyname').val("");
@@ -234,30 +209,21 @@ function create_or_join_party(partyName, password, guestName) {
 
 			//update my playlist
 			myPlaylist.on('value', function(data) {
-				// if (data) {
-					var tracks= data.val();
-					console.log(tracks);
-					list_html= [];
+				var tracks= data.val();
+				list_html= [];
 
-					var currentTrack= findHead(tracks);
-					// console.log(currentTrack);
-					while (currentTrack!=null) {
-						list_html.push("<tr><td>"+currentTrack.displayNameHTML+"</td></tr>");
-						var nextTrackName= currentTrack.next;
-						// console.log(nextTrackName);
-						currentTrack= tracks[nextTrackName];
-					}
-					
-					$("#list_my_tracks").html(list_html.join("\n"));
-				// }
+				var currentTrack= findHead(tracks);
+				while (currentTrack!=null) {
+					list_html.push("<tr><td>"+currentTrack.displayNameHTML+"</td></tr>");
+					var nextTrackName= currentTrack.next;
+					currentTrack= tracks[nextTrackName];
+				}
+				
+				$("#list_my_tracks").html(list_html.join("\n"));
 			})
 
 			guestList.on('value', function(data) {
 				guestList.once('value', function(guestListRef) {
-					// var partySize= guestListRef.numChildren();  //shut down party if empty
-					// if (partySize===0) {
-					// 	party.remove();
-					// }
 
 					list_html= [];
 					var guest_list= guestListRef.val();
@@ -281,8 +247,6 @@ function create_or_join_party(partyName, password, guestName) {
 };
 
 function search_song(track, artist, album, page=1, limit=5) {
-	// var base_url = window.location.origin;
-	// var url= base_url+'/spotify_search'
 
 	var q= [];
 	// track= []
@@ -300,7 +264,6 @@ function search_song(track, artist, album, page=1, limit=5) {
 		// type.push("album");
 	}
 
-	// var url= "https://api.spotify.com/v1/search?q="+q.join("+")+"&type="+type.join(",")+"&limit="+limit+"&offset="+(limit*(page-1))
 	var url= "https://api.spotify.com/v1/search";
 
 	$.ajax({
@@ -322,17 +285,6 @@ function search_song(track, artist, album, page=1, limit=5) {
 
 				var newTrack= new Track(uri, trackName, artists);
 
-				// // html elements
-				// var nameElement= jQuery('<span/>', {
-				//     class: "track_name",
-				//     text: trackName
-				// });
-
-				// var artistElement= jQuery('<span/>', {
-				// 	class: "track_artist",
-				// 	text: artists
-				// });
-
 				var resultTD= jQuery('<td/>', {
 					id: "search_result"+index,
 					track: JSON.stringify(newTrack)
@@ -344,8 +296,6 @@ function search_song(track, artist, album, page=1, limit=5) {
 				});
 
 				var rowElement= jQuery('<tr/>').html(resultTD.prop('outerHTML')+"<td>"+addButton.prop('outerHTML')+"</td>");
-
-				console.log(rowElement);
 
 				html.push(rowElement);
 			});
@@ -363,7 +313,6 @@ function add_track(newTrack) {
 
 	myStuff.transaction(function(guest) {
 		if (guest) {
-			// var newTrack= new Track(trackUri, trackName, trackArtist);
 			guest.playlist= insertNode(guest.playlist, newTrack, "end");
 		}
 		return guest;

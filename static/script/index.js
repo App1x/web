@@ -36,18 +36,13 @@ firebase.auth().onAuthStateChanged(function(user) {
 //   // ...
 // });
 
-// var Song= function(songName) {
-// 	this.next= null;
-// 	this.previous= null;
-// 	this.songName= songName;
-// }
-
-// var Guest= function(guestName) {
-// 	this.next= null;
-// 	this.previous= null;
-// 	this.guestName= guestName;
-// 	this.headSongName= null;
-// }
+function isEmpty(abc) {
+    for(var prop in abc) {
+        if(abc.hasOwnProperty(prop))
+            return false;
+    }
+    return true;
+}
 
 //class Node
 var Node= function(id) {
@@ -76,14 +71,6 @@ function findTail(linkedList) {
 		}
 	})
 	return tail;
-}
-
-function isEmpty(abc) {
-    for(var prop in abc) {
-        if(abc.hasOwnProperty(prop))
-            return false;
-    }
-    return true;
 }
 
 function insertNode(linkedList, node, position) {
@@ -140,9 +127,39 @@ function removeNode(linkedList, node) {
 }
 //end class Node
 
-function songListItem(song) {
-	return "<tr><td>"+song.id+"</td><tr>"
+// function trackListElement(track) {
+// 	var nameElement= jQuery('<span/>', {
+// 	    class: "track_name",
+// 	    text: track.trackName
+// 	});
+
+// 	var artistElement= jQuery('<span/>', {
+// 		class: "track_artist",
+// 		text: track.trackArtist
+// 	});
+// 	return nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML')
+// }
+
+//class Song
+function Track(trackUri, trackName, trackArtist) {
+	Node.call(this, trackUri);
+	this.trackUri= trackUri;
+	this.trackName= trackName;
+	this.trackArtist= trackArtist;
+
+	var nameElement= jQuery('<span/>', {
+	    class: "track_name",
+	    text: trackName
+	});
+
+	var artistElement= jQuery('<span/>', {
+		class: "track_artist",
+		text: trackArtist
+	});
+
+	this.displayNameHTML= nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML');
 }
+//end class Song
 
 function show_login_page() {
 	$("#main_page").hide();
@@ -218,17 +235,20 @@ function create_or_join_party(partyName, password, guestName) {
 			//update my playlist
 			myPlaylist.on('value', function(data) {
 				// if (data) {
-					var songs= data.val();
+					var tracks= data.val();
+					console.log(tracks);
 					list_html= [];
 
-					var currentSong= findHead(songs);
-					while (currentSong!=null) {
-						list_html.push(songListItem(currentSong));
-						var nextSongName= currentSong.next;
-						currentSong= songs[nextSongName];
+					var currentTrack= findHead(tracks);
+					// console.log(currentTrack);
+					while (currentTrack!=null) {
+						list_html.push("<tr><td>"+currentTrack.displayNameHTML+"</td></tr>");
+						var nextTrackName= currentTrack.next;
+						// console.log(nextTrackName);
+						currentTrack= tracks[nextTrackName];
 					}
 					
-					$("#list_my_songs").html(list_html.join("\n"));
+					$("#list_my_tracks").html(list_html.join("\n"));
 				// }
 			})
 
@@ -243,15 +263,15 @@ function create_or_join_party(partyName, password, guestName) {
 					var guest_list= guestListRef.val();
 					var currentGuest= findHead(guest_list);
 					while (currentGuest!=null) {
-						var nextSong= findHead(currentGuest.playlist);
-						if (nextSong) {
-							list_html.push(songListItem(nextSong));
+						var nextTrack= findHead(currentGuest.playlist);
+						if (nextTrack) {
+							list_html.push("<tr><td>"+nextTrack.displayNameHTML+"</td></tr>");
 						}
 						var nextGuestName= currentGuest.next;
 						currentGuest= guest_list[nextGuestName];
 					}
 
-					$("#list_next_songs").html(list_html.join("\n"));
+					$("#list_next_tracks").html(list_html.join("\n"));
 				});
 			})
 
@@ -297,25 +317,29 @@ function search_song(track, artist, album, page=1, limit=5) {
 				$.each(track.artists, function(ind, artist) {
 					artists.push(artist.name);
 				})
+				artists= artists.join(", ")
 				var uri= track.uri;
 
-				// html elements
-				var nameElement= jQuery('<span/>', {
-				    class: "track_name",
-				    text: trackName
-				});
+				var newTrack= new Track(uri, trackName, artists);
 
-				var artistElement= jQuery('<span/>', {
-					class: "track_artist",
-					text: artists.join(", ")
-				});
+				// // html elements
+				// var nameElement= jQuery('<span/>', {
+				//     class: "track_name",
+				//     text: trackName
+				// });
+
+				// var artistElement= jQuery('<span/>', {
+				// 	class: "track_artist",
+				// 	text: artists
+				// });
 
 				var resultTD= jQuery('<td/>', {
-					id: "search_result"+index
-				}).html(nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML'));
+					id: "search_result"+index,
+					track: JSON.stringify(newTrack)
+				}).html(newTrack.displayNameHTML);
 
 				var addButton= jQuery('<button/>', {
-					onclick: 'add_song($("#search_result"+index).val())',
+					onclick: 'add_track($("#search_result'+index+'").attr("track"))',
 					text: "+"
 				});
 
@@ -334,12 +358,13 @@ function search_song(track, artist, album, page=1, limit=5) {
 	})
 }
 
-function add_song(songName) {
+function add_track(newTrack) {
+	newTrack= JSON.parse(newTrack);
 
 	myStuff.transaction(function(guest) {
 		if (guest) {
-			var newSong= new Node(songName);
-			guest.playlist= insertNode(guest.playlist, newSong, "end");
+			// var newTrack= new Track(trackUri, trackName, trackArtist);
+			guest.playlist= insertNode(guest.playlist, newTrack, "end");
 		}
 		return guest;
 	})

@@ -260,17 +260,73 @@ function create_or_join_party(partyName, password, guestName) {
 	});
 };
 
-function search_song(track, artist, album) {
-	var base_url = window.location.origin;
-	var url= base_url+'/spotify_search'
+function search_song(track, artist, album, page=1, limit=5) {
+	// var base_url = window.location.origin;
+	// var url= base_url+'/spotify_search'
+
+	var q= [];
+	// track= []
+	var type= ["track"];
+	if (track) {
+		q.push(track);
+		// type.push("track");
+	}
+	if (artist) {
+		q.push(artist);
+		// type.push("artist");
+	}
+	if (album) {
+		q.push(album);
+		// type.push("album");
+	}
+
+	// var url= "https://api.spotify.com/v1/search?q="+q.join("+")+"&type="+type.join(",")+"&limit="+limit+"&offset="+(limit*(page-1))
+	var url= "https://api.spotify.com/v1/search";
+
 	$.ajax({
 		dataType: "json",
 		url: url,
-		data: {track:track, artist:artist, album:album},
+		data: {q:q.join("+"), type:type.join(","), limit:limit, offset:(limit*(page-1))},
 		success: function(data) {
 			console.log(data);
 
-			$("#search_results").html(data.localResults.toString());
+			var html= [];
+			$.each(data.tracks.items, function(index, track) {
+				var trackName= track.name;
+				var artists= [];
+				$.each(track.artists, function(ind, artist) {
+					artists.push(artist.name);
+				})
+				var uri= track.uri;
+
+				// html elements
+				var nameElement= jQuery('<span/>', {
+				    class: "track_name",
+				    text: trackName
+				});
+
+				var artistElement= jQuery('<span/>', {
+					class: "track_artist",
+					text: artists.join(", ")
+				});
+
+				var resultTD= jQuery('<td/>', {
+					id: "search_result"+index
+				}).html(nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML'));
+
+				var addButton= jQuery('<button/>', {
+					onclick: 'add_song($("#search_result"+index).val())',
+					text: "+"
+				});
+
+				var rowElement= jQuery('<tr/>').html(resultTD.prop('outerHTML')+"<td>"+addButton.prop('outerHTML')+"</td>");
+
+				console.log(rowElement);
+
+				html.push(rowElement);
+			});
+
+			$("#search_results").html(html);
 		},
 		error: function(error) {
 			console.log(error);

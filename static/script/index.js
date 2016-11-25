@@ -13,6 +13,9 @@ var myName= null;
 var myStuff= null;
 var myPlaylist= null;
 
+var renderSpotify= true;
+// var amHost= false;
+
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // User is signed in.
@@ -109,7 +112,7 @@ function removeNode(linkedList, node) {
 
 	var currentNode= findHead(linkedList);
 	while (currentNode!=null) {
-		if (currentNode===node) {
+		if (currentNode.id===node.id) {
 			if (node.prev!=null) linkedList[node.prev].next= node.next || null;
 			if (node.next!=null) linkedList[node.next].prev= node.prev || null;
 			linkedList[node.id]= null;
@@ -122,11 +125,12 @@ function removeNode(linkedList, node) {
 //end class Node
 
 //class Track
-function Track(trackUri, trackName, trackArtist) {
+function Track(trackUri, trackName, trackArtist, trackDuration) {
 	Node.call(this, trackUri);
 	this.trackUri= trackUri;
 	this.trackName= trackName;
 	this.trackArtist= trackArtist;
+	this.trackDuration= trackDuration;
 
 	var nameElement= jQuery('<span/>', {
 	    class: "track_name",
@@ -176,9 +180,22 @@ function leave_party() {
 	show_login_page();
 }
 
-// function shut_party_down() {
-// 	this.party.remove();
-// }
+function track_html_listing(track, owned) {
+	var trackTd= jQuery('<td/>', {
+		// track: JSON.stringify(track)
+	}).html(track.displayNameHTML);
+
+	var removeButton= jQuery('<button/>', {
+		track: JSON.stringify(track),
+		onclick: "remove_track($(this).attr('track'))",
+		text: "-"
+	});
+
+	html= "<tr>"+trackTd.prop("outerHTML");
+	if (owned) html+= "<td>"+removeButton.prop("outerHTML")+"</td>";
+	html+= "</tr>"
+	return html
+}
 
 function create_or_join_party(partyName, password, guestName) {
 
@@ -214,7 +231,7 @@ function create_or_join_party(partyName, password, guestName) {
 
 				var currentTrack= findHead(tracks);
 				while (currentTrack!=null) {
-					list_html.push("<tr><td>"+currentTrack.displayNameHTML+"</td></tr>");
+					list_html.push(track_html_listing(currentTrack, true));
 					var nextTrackName= currentTrack.next;
 					currentTrack= tracks[nextTrackName];
 				}
@@ -235,7 +252,7 @@ function create_or_join_party(partyName, password, guestName) {
 						var nextTrack= findHead(currentGuest.playlist);
 						if (nextTrack) {
 							if (list_html.length==0) nextUpUri= nextTrack.trackUri;
-							list_html.push("<tr><td>"+nextTrack.displayNameHTML+"</td></tr>");
+							list_html.push(track_html_listing(nextTrack, false));
 						}
 						var nextGuestName= currentGuest.next;
 						currentGuest= guest_list[nextGuestName];
@@ -244,11 +261,27 @@ function create_or_join_party(partyName, password, guestName) {
 
 					//play next track
 					if (nextUpUri!=null) {
-						jQuery('<iframe/>', {
-							src: "https://embed.spotify.com/?uri="+nextUpUri,
-							frameborder: "0",
-							allowtransparency: "true"
-						}).appendTo("#spotify_widget");
+						var changedUri= false;
+						party.child("upNext").transaction(function(storedNextUri) {
+							if (storedNextUri!=nextUpUri) {
+								storedNextUri= nextUpUri;
+								changedUri= true;
+							} else {
+								changedUri= false;
+							}
+							return storedNextUri;
+						}).then(function(data) {
+							if (changedUri || renderSpotify) {
+								renderSpotify= false;
+								var spotifyWidget= jQuery('<iframe/>', {
+									src: "https://embed.spotify.com/?uri="+nextUpUri,
+									frameborder: "0",
+									allowtransparency: "true"
+								});
+								$("#spotify_widget").html(spotifyWidget);
+								$("#play-button").click();
+							}
+						});
 					}
 				});
 			})
@@ -294,16 +327,18 @@ function search_song(track, artist, album, page=1, limit=5) {
 				})
 				artists= artists.join(", ")
 				var uri= track.uri;
+				var duration= Math.floor((track.duration_ms/1000)/120)+':'+Math.floor((track.duration_ms/1000)%120);
 
-				var newTrack= new Track(uri, trackName, artists);
+				var newTrack= new Track(uri, trackName, artists, duration);
 
 				var resultTD= jQuery('<td/>', {
-					id: "search_result"+index,
-					track: JSON.stringify(newTrack)
+					// id: "search_result"+index,
+					// track: JSON.stringify(newTrack)
 				}).html(newTrack.displayNameHTML);
 
 				var addButton= jQuery('<button/>', {
-					onclick: 'add_track($("#search_result'+index+'").attr("track"))',
+					track: JSON.stringify(newTrack),
+					onclick: 'add_track($(this).attr("track"))',
 					text: "+"
 				});
 
@@ -329,6 +364,14 @@ function add_track(newTrack) {
 		}
 		return guest;
 	})
+}
+
+function remove_track(track) {
+	track= JSON.parse(track);
+
+	myPlaylist.transaction(function(tracks) {
+		return removeNode(tracks, track);
+	});
 }
 
 

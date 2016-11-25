@@ -260,6 +260,24 @@ function create_or_join_party(partyName, password, guestName) {
 	});
 };
 
+function search_song(track, artist, album) {
+	var base_url = window.location.origin;
+	var url= base_url+'/spotify_search'
+	$.ajax({
+		dataType: "json",
+		url: url,
+		data: {track:track, artist:artist, album:album},
+		success: function(data) {
+			console.log(data);
+
+			$("#search_results").html(data.localResults.toString());
+		},
+		error: function(error) {
+			console.log(error);
+		}
+	})
+}
+
 function add_song(songName) {
 
 	myStuff.transaction(function(guest) {

@@ -29,5 +29,13 @@
 		%strong
 			My Playlist:
 		%table{:id=> "list_my_songs"}
-	%input{:id=> "search_song", :type=> "text", :placeholder=> "Song to add"}
-	%button{:id=> "search_song_button", :onclick=> "add_song($('#search_song').val())"}Add
+
+	%input{:id=> "track_search", :type=> "text", :placeholder=> "Search by track"}
+	%input{:id=> "artist_search", :type=> "text", :placeholder=> "Search by artist"}
+	%input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
+	%button{:id=> "search_button", :onclick=> "search_song($('#track_search').val(), $('#artist_search').val(), $('#album_search').val())"}Search
+
+	%table{:id=> "search_results"}
+
+
+/%iframe{:src=> "https://embed.spotify.com/?uri=spotify:track:5JunxkcjfCYcY7xJ29tLai", :frameborder=> "0", :allowtransparency=> "true"}

@@ -121,7 +121,7 @@ function removeNode(linkedList, node) {
 }
 //end class Node
 
-//class Song
+//class Track
 function Track(trackUri, trackName, trackArtist) {
 	Node.call(this, trackUri);
 	this.trackUri= trackUri;
@@ -176,9 +176,9 @@ function leave_party() {
 	show_login_page();
 }
 
-function shut_party_down() {
-	this.party.remove();
-}
+// function shut_party_down() {
+// 	this.party.remove();
+// }
 
 function create_or_join_party(partyName, password, guestName) {
 
@@ -225,19 +225,31 @@ function create_or_join_party(partyName, password, guestName) {
 			guestList.on('value', function(data) {
 				guestList.once('value', function(guestListRef) {
 
-					list_html= [];
 					var guest_list= guestListRef.val();
 					var currentGuest= findHead(guest_list);
+
+					//populate next up
+					var nextUpUri= null;
+					var list_html= [];
 					while (currentGuest!=null) {
 						var nextTrack= findHead(currentGuest.playlist);
 						if (nextTrack) {
+							if (list_html.length==0) nextUpUri= nextTrack.trackUri;
 							list_html.push("<tr><td>"+nextTrack.displayNameHTML+"</td></tr>");
 						}
 						var nextGuestName= currentGuest.next;
 						currentGuest= guest_list[nextGuestName];
 					}
-
 					$("#list_next_tracks").html(list_html.join("\n"));
+
+					//play next track
+					if (nextUpUri!=null) {
+						jQuery('<iframe/>', {
+							src: "https://embed.spotify.com/?uri="+nextUpUri,
+							frameborder: "0",
+							allowtransparency: "true"
+						}).appendTo("#spotify_widget");
+					}
 				});
 			})
 

@@ -147,13 +147,21 @@ function Track(trackUri, trackName, trackArtist, trackDuration) {
 //end class Song
 
 function show_login_page() {
-	$("#main_page").hide();
 	$("#login_page").show();
+	$("#play_page").hide();
+	$("#my_page").hide();
 }
 
-function show_main_page() {
+function show_play_page() {
 	$("#login_page").hide();
-	$("#main_page").show();
+	$("#play_page").show();
+	$("#my_page").hide();
+}
+
+function show_my_page() {
+	$("#login_page").hide();
+	$("#play_page").hide();
+	$("#my_page").show();
 }
 
 function leave_party() {
@@ -180,21 +188,45 @@ function leave_party() {
 	show_login_page();
 }
 
-function track_html_listing(track, owned) {
-	var trackTd= jQuery('<td/>', {
-		// track: JSON.stringify(track)
-	}).html(track.displayNameHTML);
+function track_html_listing_header() {
+	var tr= jQuery('<tr/>');
+	$.each(["Title", "Artist"], function(index, header) {
+		jQuery('<th/>', {
+			text: header
+		}).appendTo(tr);
+	});
 
-	var removeButton= jQuery('<button/>', {
+	return tr.prop("outerHTML");
+}
+
+function track_html_listing(track, showbutton, add_or_remove, odd) {
+	var trackTr= jQuery('<tr/>');
+	// if (odd) trackTr.addClass("w3-white");
+
+	var trackNameTd= jQuery('<td/>', {
+		text: track.trackName
+	});
+	var trackArtistTd= jQuery('<td/>', {
+		text: track.trackArtist
+	});
+	var buttonTd= jQuery('<td/>');
+	var button= jQuery('<button/>', {
 		track: JSON.stringify(track),
-		onclick: "remove_track($(this).attr('track'))",
+		onclick: add_or_remove+"_track($(this).attr('track'))",
 		text: "-"
 	});
 
-	html= "<tr>"+trackTd.prop("outerHTML");
-	if (owned) html+= "<td>"+removeButton.prop("outerHTML")+"</td>";
-	html+= "</tr>"
-	return html
+	trackNameTd.appendTo(trackTr);
+	trackArtistTd.appendTo(trackTr);
+	if (showbutton) {
+		button.appendTo(buttonTd);
+		buttonTd.appendTo(trackTr);
+	}
+	// html= "<tr>"
+	// html+="<td>"+track.trackName+"<td><td>"+track.trackArtist;
+	// if (owned) html+= "<td>"+removeButton.prop("outerHTML")+"</td>";
+	// html+= "</tr>"
+	return track_html_listing_header()+trackTr.prop("outerHTML");
 }
 
 function create_or_join_party(partyName, password, guestName) {
@@ -230,8 +262,9 @@ function create_or_join_party(partyName, password, guestName) {
 				list_html= [];
 
 				var currentTrack= findHead(tracks);
+				var odd= 0;
 				while (currentTrack!=null) {
-					list_html.push(track_html_listing(currentTrack, true));
+					list_html.push(track_html_listing(currentTrack, true, "remove", 1-(++odd)===0));
 					var nextTrackName= currentTrack.next;
 					currentTrack= tracks[nextTrackName];
 				}
@@ -248,11 +281,12 @@ function create_or_join_party(partyName, password, guestName) {
 					//populate next up
 					var nextUpUri= null;
 					var list_html= [];
+					var odd= 0;
 					while (currentGuest!=null) {
 						var nextTrack= findHead(currentGuest.playlist);
 						if (nextTrack) {
 							if (list_html.length==0) nextUpUri= nextTrack.trackUri;
-							list_html.push(track_html_listing(nextTrack, false));
+							list_html.push(track_html_listing(nextTrack, false, null, 1-(++odd)===0));
 						}
 						var nextGuestName= currentGuest.next;
 						currentGuest= guest_list[nextGuestName];
@@ -286,7 +320,7 @@ function create_or_join_party(partyName, password, guestName) {
 				});
 			})
 
-			show_main_page();
+			show_play_page();
 		}
 	});
 };
@@ -331,18 +365,19 @@ function search_song(track, artist, album, page=1, limit=5) {
 
 				var newTrack= new Track(uri, trackName, artists, duration);
 
-				var resultTD= jQuery('<td/>', {
-					// id: "search_result"+index,
-					// track: JSON.stringify(newTrack)
-				}).html(newTrack.displayNameHTML);
+				// var resultTD= jQuery('<td/>', {
+				// 	// id: "search_result"+index,
+				// 	// track: JSON.stringify(newTrack)
+				// }).html(newTrack.displayNameHTML);
 
-				var addButton= jQuery('<button/>', {
-					track: JSON.stringify(newTrack),
-					onclick: 'add_track($(this).attr("track"))',
-					text: "+"
-				});
+				// var addButton= jQuery('<button/>', {
+				// 	track: JSON.stringify(newTrack),
+				// 	onclick: 'add_track($(this).attr("track"))',
+				// 	text: "+"
+				// });
 
-				var rowElement= jQuery('<tr/>').html(resultTD.prop('outerHTML')+"<td>"+addButton.prop('outerHTML')+"</td>");
+				// var rowElement= jQuery('<tr/>').html(resultTD.prop('outerHTML')+"<td>"+addButton.prop('outerHTML')+"</td>");
+				var rowElement= track_html_listing(newTrack, true, "add", (index+1)%2===1)
 
 				html.push(rowElement);
 			});

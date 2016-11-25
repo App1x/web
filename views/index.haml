@@ -1,49 +1,84 @@
+%meta{:name=>"viewport", :content=>"width=device-width, initial-scale=1"}
 %script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase.js"}
 %script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-app.js"}
 %script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-auth.js"}
 %script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-database.js"}
 %script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-messaging.js"}
 %script{:src=> "script/jquery-3.1.1.min.js", :type=> "text/javascript"}
-%script{:src=> "style/index.css", :type=>"text/css"}
+%link{:href=> "style/w3.css", :rel=>"stylesheet"}
+%link{:href=> "style/index.css", :rel=>"stylesheet"}
 %script{:src=> "script/index.js", :type=> "text/javascript"}
 
 
 /		%script{:src=> "https://www.gstatic.com/firebasejs/3.6.1/firebase-storage.js"}
 
-%div{:id=> "login_page"}
-	%input{:id=> "partyname", :type=> "text", :placeholder=> "Enter the party's name"}
-	%br
-	%input{:id=> "partypass", :type=> "text", :placeholder=> "Enter password"}
-	%br
-	%input{:id=> "username", :type=> "text", :placeholder=> "Enter your username"}
-	%br
-	%button{:onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())"}
-		Create or join party!
+%body{:class=>"w3-content", :style=>"max-width:1300px"}
 
-%div{:id=> "main_page", :hidden=> true}
-	%button{:id=> "leave_party_button", :onclick=> "leave_party()"}Leave Party
-	%div{:id=> "now_playing"}
-		%strong
-			Now Playing:
-		%div{:id=> "spotify_widget"}
-	%div{:id=> "up_next"}
-		%strong
-			Up Next:
-		%table{:id=> "list_next_tracks"}
-	%div{:id=> "my_playlist"}
-		%strong
-			My Playlist:
-		%table{:id=> "list_my_tracks"}
+	%div{:id=> "login_page"}
+		%div{:class=>"w3-row"}
+			%div{:class=>"djparty-whole w3-black w3-container w3-center", :style=>"height:700px"}
+				%div{:class=>"w3-padding-64"}
+					%h1{}DjParty
+				%div{:class=>"w3-padding-64"}
+					%input{:id=> "partyname", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter the party's name"}
+					%br
+					%input{:id=> "partypass", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter password"}
+					%br
+					%input{:id=> "username", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter your username"}
+					%button{:onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())", :class=>"w3-btn w3-btn-block w3-hover-brown w3-padding-16"}Create or join party!
 
-	%div{:id=> "search"}
-		%strong
-			Search:
-		%input{:id=> "track_search", :type=> "text", :placeholder=> "Search by track"}
-		%input{:id=> "artist_search", :type=> "text", :placeholder=> "Search by artist"}
-		%input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
-		%button{:id=> "search_button", :onclick=> "search_song($('#track_search').val(), $('#artist_search').val(), $('#album_search').val())"}Search
-
-	%table{:id=> "search_results"}
+	%div{:id=> "play_page", :hidden=> true}
+		%div{:class=>"djparty-whole w3-indigo w3-container", :style=>"min-height:800px"}
+			%div{:class=>"w3-padding-64 w3-center"}
+				%h2{}Now Playing
+				%div{:id=> "spotify_widget"}
+				%div
+					%p{:class=> "w3-threequarter"}Up Next
+					%button{:onclick=> "show_my_page()", :class=>"w3-btn w3-btn-bar w3-hover-khaki w3-padding-16"}Manage your playlist >>>
+				%div{:class=>"w3-container w3-responsive"}
+					%table{:id=> "list_next_tracks", :class=>"w3-table-all w3-center"}
+				%button{:id=> "leave_party_button", :class=>"w3-btn w3-btn-block w3-hover-red w3-padding-16", :onclick=> "leave_party()"}Leave Party
 
 
-/%iframe{:src=> "https://embed.spotify.com/?uri=spotify:track:5JunxkcjfCYcY7xJ29tLai", :frameborder=> "0", :allowtransparency=> "true"}
+	%div{:id=> "my_page", :hidden=> true}
+		%div{:id=> "my_playlist"}
+			%strong
+				My Playlist:
+			%table{:id=> "list_my_tracks"}
+
+		%div{:id=> "search"}
+			%strong
+				Search:
+			%input{:id=> "track_search", :type=> "text", :placeholder=> "Search by track"}
+			%input{:id=> "artist_search", :type=> "text", :placeholder=> "Search by artist"}
+			%input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
+			%button{:id=> "search_button", :onclick=> "search_song($('#track_search').val(), $('#artist_search').val(), $('#album_search').val())"}Search
+
+		%table{:id=> "search_results"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

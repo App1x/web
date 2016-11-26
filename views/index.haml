@@ -37,24 +37,29 @@
 					%button{:onclick=> "show_my_page()", :class=>"w3-btn w3-btn-bar w3-hover-khaki w3-padding-16"}Manage your playlist >>>
 				%div{:class=>"w3-container w3-responsive"}
 					%table{:id=> "list_next_tracks", :class=>"w3-table-all w3-center"}
-				%button{:id=> "leave_party_button", :class=>"w3-btn w3-btn-block w3-hover-red w3-padding-16", :onclick=> "leave_party()"}Leave Party
+				%button{:id=> "leave_party_button", :class=>"w3-btn w3-btn-block w3-hover-red w3-padding-16 w3-margin-top", :onclick=> "leave_party()"}Leave Party
 
 
 	%div{:id=> "my_page", :hidden=> true}
-		%div{:id=> "my_playlist"}
-			%strong
-				My Playlist:
-			%table{:id=> "list_my_tracks"}
+		%div{:class=>"djparty-whole w3-blue-grey w3-container w3-center", :style=>"height:700px"}
+			%button{:class=> "w3-btn-floating w3-left", :onclick=> "show_play_page()"}⇦
+			%div{:class=>"w3-padding-64 w3-center"}
+				%h2{}My Playlist
+				%p{}Up Next
+				%div{:class=>"w3-container w3-responsive"}
+					%table{:id=> "list_my_tracks", :class=>"w3-table-all w3-center"}
+				%p{}Search
+				%div{:class=> "w3-center"}
+					%input{:id=> "search_input", :type=> "text", :placeholder=> "Search by track"}
+					/ %br
+					/ %input{:id=> "artist_search", :type=> "text", :placeholder=> "Search by artist"}
+					/ %br
+					/ %input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
+					/ %br
+					%button{:id=> "search_button", :class=>"w3-btn w3-btn-bar w3-hover-sand w3-padding-16", :onclick=> "search_song($('#search_input').val())"}Search
+				%div{:class=>"w3-container w3-responsive "}
+					%table{:id=> "search_results", :class=>"w3-table-all w3-center"}
 
-		%div{:id=> "search"}
-			%strong
-				Search:
-			%input{:id=> "track_search", :type=> "text", :placeholder=> "Search by track"}
-			%input{:id=> "artist_search", :type=> "text", :placeholder=> "Search by artist"}
-			%input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
-			%button{:id=> "search_button", :onclick=> "search_song($('#track_search').val(), $('#artist_search').val(), $('#album_search').val())"}Search
-
-		%table{:id=> "search_results"}
 
 
 

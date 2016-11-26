@@ -14,7 +14,8 @@ var myStuff= null;
 var myPlaylist= null;
 
 var renderSpotify= true;
-// var amHost= false;
+var amPartyHost= false;
+var amSongOwner= false;
 
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
@@ -121,6 +122,15 @@ function removeNode(linkedList, node) {
 		currentNode= linkedList[currentNode.next];
 	}
 	return linkedList;
+}
+
+function cycle_nodes(linkedList) {
+	var head= findHead(linkedList);
+	var tail= findTail(linkedList);
+	linkedList[head.next].previous= null;
+	linkedList[head.id].next= null;
+	linkedList[head.id].previous= tail.id;
+	linkedList[tail.id].next= head.id;
 }
 //end class Node
 
@@ -244,8 +254,10 @@ function create_or_join_party(partyName, password, guestName) {
 				$('#partyname').attr("placeholder", "Party name already exists");
 				return;
 			}
+			amPartyHost= party.host===guestName;
 		} else {
 			party= {guestList: {}, password: password};  //create new party
+			amPartyHost= true;
 		}
 
 		if (party.guestList[guestName]==null) {
@@ -253,13 +265,19 @@ function create_or_join_party(partyName, password, guestName) {
 		}
 
 		return party;
-	}, function(error, committed, snapshot) {
+	}, function(error, committed, snapshot) {  //initialize listeners
+		console.log(amPartyHost);
 		if (got_in) {
 			myName= guestName;
 			party= parties.child(partyName);
 			guestList= party.child('guestList');
 			myStuff= guestList.child(guestName);
 			myPlaylist= myStuff.child('playlist');
+
+			//save party host
+			if (amPartyHost) {
+				party.update({host: myName});
+			}
 
 			//update my playlist
 			myPlaylist.on('value', function(data) {
@@ -274,23 +292,24 @@ function create_or_join_party(partyName, password, guestName) {
 					currentTrack= tracks[nextTrackName];
 				}
 				
-				$("#list_my_tracks").html(list_html.join("\n"));
+				$("#list_my_tracks").html(track_html_listing_header()+list_html.join("\n"));
 			})
 
 			guestList.on('value', function(data) {
 				guestList.once('value', function(guestListRef) {
 
 					var guest_list= guestListRef.val();
-					var currentGuest= findHead(guest_list);
+					var headGuest= findHead(guest_list);
 
 					//populate next up
-					var nextUpUri= null;
+					var nextUpTrack= null;
 					var list_html= [];
 					var odd= 0;
+					currentGuest= headGuest;
 					while (currentGuest!=null) {
 						var nextTrack= findHead(currentGuest.playlist);
 						if (nextTrack) {
-							if (list_html.length==0) nextUpUri= nextTrack.trackUri;
+							if (list_html.length==0) nextUpTrack= nextTrack;
 							list_html.push(track_html_listing(nextTrack, null, 1-(++odd)===0));
 						}
 						var nextGuestName= currentGuest.next;
@@ -299,26 +318,48 @@ function create_or_join_party(partyName, password, guestName) {
 					$("#list_next_tracks").html(track_html_listing_header()+list_html.join("\n"));
 
 					//play next track
-					if (nextUpUri!=null) {
+					if (nextUpTrack!=null) {
 						var changedUri= false;
-						party.child("upNext").transaction(function(storedNextUri) {
-							if (storedNextUri!=nextUpUri) {
-								storedNextUri= nextUpUri;
+						party.child("upNext").transaction(function(storedNextUri) {  //change in database
+							if (storedNextUri!=nextUpTrack.trackUri) {
+								storedNextUri= nextUpTrack.trackUri;
 								changedUri= true;
+
+								if (headGuest.id===myName) {
+									amSongOwner= true;
+								} else {
+									amSongOwner= false;
+								}
 							} else {
 								changedUri= false;
 							}
 							return storedNextUri;
-						}).then(function(data) {
+						}).then(function(data) {  //render spotify widget
 							if (changedUri || renderSpotify) {
 								renderSpotify= false;
 								var spotifyWidget= jQuery('<iframe/>', {
-									src: "https://embed.spotify.com/?uri="+nextUpUri,
+									src: "https://embed.spotify.com/?uri="+nextUpTrack.trackUri,
 									frameborder: "0",
 									allowtransparency: "true"
 								});
 								$("#spotify_widget").html(spotifyWidget);
-								$("#play-button").click();
+								console.log(amSongOwner);
+								if (amSongOwner) {
+									console.log("check progress");
+									$("#progress-time").change(function() {
+										console.log($(this).text());
+										var currentProgress= $(this).text();
+										if (currentProgress===nextUpTrack.trackDuration) {
+											guestList.transaction(function(guest_list) {
+												if (guest_list) {
+													cycleNodes(guest_list);
+													remove_track(nextUpTrack);
+												}
+												return guest_list;
+											})
+										}
+									});
+								}
 							}
 						});
 					}

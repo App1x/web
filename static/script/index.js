@@ -16,6 +16,7 @@ var myPlaylist= null;
 var renderSpotify= true;
 var amPartyHost= false;
 var amSongOwner= false;
+var nowPlaying= null;
 
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
@@ -58,7 +59,7 @@ var Node= function(id) {
 function findHead(linkedList) {
 	var head= null;
 	$.each(linkedList, function(index, node) {
-		if (node.prev==null) {
+		if (node.previous==null) {
 			head= node;
 			return false;
 		}
@@ -86,12 +87,12 @@ function insertNode(linkedList, node, position) {
 
 	if (position==="start" || position==="beginning") {
 		var headNode= findHead(linkedList);
-		headNode.prev= node.id;
+		headNode.previous= node.id;
 		node.next= headNode.id;
 	} else if (position==="end") {
 		var endNode= findTail(linkedList);
 		endNode.next= node.id;
-		node.prev= endNode.id;
+		node.previous= endNode.id;
 	} else {
 		var currentNode= findHead(linkedList);
 		var index= 0;
@@ -100,7 +101,7 @@ function insertNode(linkedList, node, position) {
 		}
 		node.next= currentNode.next;
 		currentNode.next= node.id;
-		node.prev= currentNode.id;
+		node.previous= currentNode.id;
 	}
 	linkedList[node.id]= node;
 	return linkedList;
@@ -114,8 +115,8 @@ function removeNode(linkedList, node) {
 	var currentNode= findHead(linkedList);
 	while (currentNode!=null) {
 		if (currentNode.id===node.id) {
-			if (node.prev!=null) linkedList[node.prev].next= node.next || null;
-			if (node.next!=null) linkedList[node.next].prev= node.prev || null;
+			if (node.previous!=null) linkedList[node.previous].next= node.next || null;
+			if (node.next!=null) linkedList[node.next].previous= node.previous || null;
 			linkedList[node.id]= null;
 			break;
 		}
@@ -124,13 +125,16 @@ function removeNode(linkedList, node) {
 	return linkedList;
 }
 
-function cycle_nodes(linkedList) {
-	var head= findHead(linkedList);
-	var tail= findTail(linkedList);
-	linkedList[head.next].previous= null;
-	linkedList[head.id].next= null;
-	linkedList[head.id].previous= tail.id;
-	linkedList[tail.id].next= head.id;
+function cycleNodes(linkedList) {
+	if (Object.keys(linkedList).length > 1) {
+		var head= findHead(linkedList);
+		var tail= findTail(linkedList);
+		linkedList[head.next].previous= null;
+		linkedList[head.id].next= null;
+		linkedList[head.id].previous= tail.id;
+		linkedList[tail.id].next= head.id;
+	}
+	return linkedList;
 }
 //end class Node
 
@@ -154,7 +158,12 @@ function Track(trackUri, trackName, trackArtist, trackDuration) {
 
 	this.displayNameHTML= nameElement.prop('outerHTML')+" - "+artistElement.prop('outerHTML');
 }
-//end class Song
+//end class Track
+
+// function trackEnded(guest_list) {
+//     cycleNodes(guest_list);
+//     remove_track(nextUpTrack);
+// }
 
 function show_login_page() {
 	$("#login_page").show();
@@ -266,7 +275,6 @@ function create_or_join_party(partyName, password, guestName) {
 
 		return party;
 	}, function(error, committed, snapshot) {  //initialize listeners
-		console.log(amPartyHost);
 		if (got_in) {
 			myName= guestName;
 			party= parties.child(partyName);
@@ -303,13 +311,17 @@ function create_or_join_party(partyName, password, guestName) {
 
 					//populate next up
 					var nextUpTrack= null;
+					var songOwner= null;
 					var list_html= [];
 					var odd= 0;
 					currentGuest= headGuest;
 					while (currentGuest!=null) {
 						var nextTrack= findHead(currentGuest.playlist);
 						if (nextTrack) {
-							if (list_html.length==0) nextUpTrack= nextTrack;
+							if (list_html.length==0) {
+								nextUpTrack= nextTrack;
+								songOwner= currentGuest.id;
+							}
 							list_html.push(track_html_listing(nextTrack, null, 1-(++odd)===0));
 						}
 						var nextGuestName= currentGuest.next;
@@ -325,7 +337,7 @@ function create_or_join_party(partyName, password, guestName) {
 								storedNextUri= nextUpTrack.trackUri;
 								changedUri= true;
 
-								if (headGuest.id===myName) {
+								if (songOwner===myName) {
 									amSongOwner= true;
 								} else {
 									amSongOwner= false;
@@ -337,31 +349,14 @@ function create_or_join_party(partyName, password, guestName) {
 						}).then(function(data) {  //render spotify widget
 							if (changedUri || renderSpotify) {
 								renderSpotify= false;
-								var spotifyWidget= jQuery('<iframe/>', {
-									src: "https://embed.spotify.com/?uri="+nextUpTrack.trackUri,
-									frameborder: "0",
-									allowtransparency: "true"
-								});
-								$("#spotify_widget").html(spotifyWidget);
-								console.log(amSongOwner);
-								if (amSongOwner) {
-									console.log("check progress");
-									$("#progress-time").change(function() {
-										console.log($(this).text());
-										var currentProgress= $(this).text();
-										if (currentProgress===nextUpTrack.trackDuration) {
-											guestList.transaction(function(guest_list) {
-												if (guest_list) {
-													cycleNodes(guest_list);
-													remove_track(nextUpTrack);
-												}
-												return guest_list;
-											})
-										}
-									});
-								}
+								loadFirstResult(nextUpTrack.trackName+' '+nextUpTrack.trackArtist);
+								nowPlaying= nextUpTrack;
+
+								party.update({"songOwner": songOwner})
 							}
 						});
+					} else {
+						party.update({"songOwner": null});
 					}
 				});
 			})
@@ -447,11 +442,15 @@ function add_track(newTrack) {
 	})
 }
 
-function remove_track(track) {
+function remove_track(track, username=myName) {
 	track= JSON.parse(track);
 
-	myPlaylist.transaction(function(tracks) {
-		return removeNode(tracks, track);
+	guestList.transaction(function(guest_list) {
+		if (guest_list) {
+			guest_list[username].playlist= removeNode(guest_list[username].playlist, track);
+		}
+		
+		return guest_list;
 	});
 }
 

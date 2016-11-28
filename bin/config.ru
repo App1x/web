@@ -1,2 +1,2 @@
-require './djparty.rb'
+require './djparty'
 run Sinatra::Application

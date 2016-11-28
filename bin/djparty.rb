@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'haml'
-require 'rspotify'
+# require 'rspotify'
 require 'json'
 
 set :port, 8080

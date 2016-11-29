@@ -32,21 +32,45 @@ function onYouTubeIframeAPIReady() {
 // var done = false;
 function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
-    guestList.transaction(function(guest_list) {
-      if (guest_list) {
-        cycleNodes(guest_list);
+    party.once('value', function(partyRef) {
+      if (partyRef) {
+        var party_val= partyRef.val();
+        var guest_list= party_val.guestList;
 
-        var songOwner= myName;
-        party.once('value', function(partyRef) {
-          if (partyRef) {
-            songOwner= partyRef.val().songOwner;
-          }
-        })
+        var songOwner= party_val.songOwner;
+        console.log(songOwner);
+        var nextUp= party_val.nextUp;
 
-        remove_track(JSON.stringify(nowPlaying), songOwner);
+        nextUpTrack= guest_list[songOwner].playlist[nextUp];
+        loadNextSong(guest_list, nextUpTrack, songOwner, true, songOwner===myName);
       }
-      return guest_list;
     })
+
+    // guestList.transaction(function(guest_list) {
+    //   if (guest_list) {
+
+    //     // var nextUpTrack= null;
+    //     // var songOwner= null;
+    //     party.once('value', function(partyRef) {
+    //       if (partyRef) {
+    //         party_val= partyRef.val();
+
+    //         songOwner= party_val.songOwner;
+    //         console.log(songOwner);
+
+    //         nextUpTrack= guest_list[songOwner].playlist[party_val.nextUp];
+    //         guest_list= loadNextSong(guest_list, nextUpTrack, songOwner, true);
+    //       }
+    //     })
+
+    //     // nowPlaying= nextUpTrack;
+
+    //     // cycleNodes(guest_list);
+    //     // remove_track(JSON.stringify(nowPlaying), songOwner);
+    //     // party.update({"songOwner": songOwner})
+    //   }
+    //   return guest_list;
+    // })
   }
 }
 

@@ -30,7 +30,6 @@ function onPlayerStateChange(event) {
                 var guest_list= party_val.guestList;
 
                 var songOwner= party_val.songOwner;
-                console.log(songOwner);
                 var nextUp= party_val.nextUp;
 
                 if (nextUp) {
@@ -41,7 +40,6 @@ function onPlayerStateChange(event) {
         })
     }
 
-    console.log(amPartyHost);
     if (!amPartyHost) {
         player.pauseVideo();
     }

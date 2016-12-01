@@ -23,7 +23,7 @@ function onYouTubeIframeAPIReady() {
 //    The function indicates that when playing a video (state=1),
 //    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.ENDED) {
+    if (event.data == YT.PlayerState.ENDED && amPartyHost) {
         loadNextSong();
     }
 

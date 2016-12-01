@@ -80,6 +80,7 @@ function leave_party() {
 	})
 	$("#list_my_songs").html("")
 	$("#list_next_songs").html("")
+	player.loadVideoById(null);
 
 	this.myPlaylist.off('value');
 	this.guestList.off('value');

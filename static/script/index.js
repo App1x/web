@@ -161,11 +161,6 @@ function Track(trackUri, trackName, trackArtist, trackDuration) {
 }
 //end class Track
 
-// function trackEnded(guest_list) {
-//     cycleNodes(guest_list);
-//     remove_track(nextUpTrack);
-// }
-
 function show_login_page() {
 	$("#login_page").show();
 	$("#play_page").hide();
@@ -247,10 +242,6 @@ function track_html_listing(track, add_or_remove, odd) {
 	} else {
 		jQuery('<td/>').appendTo(trackTr);
 	}
-	// html= "<tr>"
-	// html+="<td>"+track.trackName+"<td><td>"+track.trackArtist;
-	// if (owned) html+= "<td>"+removeButton.prop("outerHTML")+"</td>";
-	// html+= "</tr>"
 	return trackTr.prop("outerHTML");
 }
 
@@ -286,6 +277,8 @@ function create_or_join_party(partyName, password, guestName) {
 			//save party host
 			if (amPartyHost) {
 				party.update({host: myName});
+			} else {
+				console.log("dothis");
 			}
 
 			//update my playlist
@@ -326,7 +319,7 @@ function create_or_join_party(partyName, password, guestName) {
 							party.update({nextUp: nextTrack.id, songOwner: songOwner}).then(function(data) {
 								if (noSongPlaying || player.getPlayerState()==YT.PlayerState.ENDED) {
 									noSongPlaying= false;
-									loadNextSong(guest_list, nextUpTrack, songOwner, true, amPartyHost);
+									loadNextSong(guest_list, nextUpTrack, songOwner, true);
 								}
 							});
 						}

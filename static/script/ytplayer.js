@@ -13,69 +13,70 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
     height: '100',
     width: '300',
-    // videoId: 'M7lc1UVf-VE',
     events: {
-      // 'onReady': onPlayerReady,
       'onStateChange': onPlayerStateChange
     }
   });
 }
 
-// // 4. The API will call this function when the video player is ready.
-// function onPlayerReady(event) {
-//   event.target.playVideo();
-// }
-
 // 5. The API calls this function when the player's state changes.
 //    The function indicates that when playing a video (state=1),
 //    the player should play for six seconds and then stop.
-// var done = false;
 function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.ENDED) {
-    party.once('value', function(partyRef) {
-      if (partyRef) {
-        var party_val= partyRef.val();
-        var guest_list= party_val.guestList;
+    if (event.data == YT.PlayerState.ENDED) {
+        party.once('value', function(partyRef) {
+            if (partyRef) {
+                var party_val= partyRef.val();
+                var guest_list= party_val.guestList;
 
-        var songOwner= party_val.songOwner;
-        console.log(songOwner);
-        var nextUp= party_val.nextUp;
+                var songOwner= party_val.songOwner;
+                console.log(songOwner);
+                var nextUp= party_val.nextUp;
 
-        if (nextUp) {
-            nextUpTrack= guest_list[songOwner].playlist[nextUp];
-            loadNextSong(guest_list, nextUpTrack, songOwner, true, songOwner===myName);
-        }
-      }
-    })
+                if (nextUp) {
+                    nextUpTrack= guest_list[songOwner].playlist[nextUp];
+                    loadNextSong(guest_list, nextUpTrack, songOwner, true);
+                }
+            }
+        })
+    }
 
-    // guestList.transaction(function(guest_list) {
-    //   if (guest_list) {
-
-    //     // var nextUpTrack= null;
-    //     // var songOwner= null;
-    //     party.once('value', function(partyRef) {
-    //       if (partyRef) {
-    //         party_val= partyRef.val();
-
-    //         songOwner= party_val.songOwner;
-    //         console.log(songOwner);
-
-    //         nextUpTrack= guest_list[songOwner].playlist[party_val.nextUp];
-    //         guest_list= loadNextSong(guest_list, nextUpTrack, songOwner, true);
-    //       }
-    //     })
-
-    //     // nowPlaying= nextUpTrack;
-
-    //     // cycleNodes(guest_list);
-    //     // remove_track(JSON.stringify(nowPlaying), songOwner);
-    //     // party.update({"songOwner": songOwner})
-    //   }
-    //   return guest_list;
-    // })
-  }
+    console.log(amPartyHost);
+    if (!amPartyHost) {
+        player.pauseVideo();
+    }
 }
 
-// function stopVideo() {
-//   player.stopVideo();
-// }
+function loadNextSong(guest_list, nextUpTrack, songOwner, autoplay=false) {
+  var request = gapi.client.youtube.search.list({
+    q: nextUpTrack.trackName+' '+nextUpTrack.trackArtist,
+    part: 'id, snippet',
+    type: 'video'
+  });
+
+  request.execute(function(response) {
+
+    if (autoplay) {
+      player.loadVideoById(response.items[0].id.videoId);
+    } else {
+      player.cueVideoById(response.items[0].id.videoId);
+    }
+
+    remove_track(JSON.stringify(nextUpTrack), songOwner, true);
+
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

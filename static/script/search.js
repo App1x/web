@@ -4,7 +4,7 @@ function handleAPILoaded() {
 }
 
 // Search for a specified string.
-function loadNextSong(guest_list, nextUpTrack, songOwner, autoplay=false, amSongOwner=false) {
+function loadNextSong(guest_list, nextUpTrack, songOwner, autoplay=false) {
   // var q = $('#query').val();
   var request = gapi.client.youtube.search.list({
     q: nextUpTrack.trackName+' '+nextUpTrack.trackArtist,
@@ -22,10 +22,11 @@ function loadNextSong(guest_list, nextUpTrack, songOwner, autoplay=false, amSong
       player.cueVideoById(response.items[0].id.videoId);
     }
 
-    if (!amSongOwner) {
-      player.pauseVideo();
-      $("iframe").addClass("w3-disabled");
-    }
+    // console.log(amPartyHost);
+    // if (!amPartyHost) {
+    //   console.log("pause");
+    //   player.pauseVideo();
+    // }
 
     remove_track(JSON.stringify(nextUpTrack), songOwner, true);
     // party.update({guestList: cycleNodes(guest_list)});

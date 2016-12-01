@@ -3,3 +3,4 @@
 /*#manage_button{width:20%;}*/
 .djparty-input{color:white;}
 .djparty-whole{width:99.99999%;}
+iframe>body * { pointer-events: none;}{pointer-events:none;}

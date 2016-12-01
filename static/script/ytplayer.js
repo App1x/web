@@ -41,8 +41,10 @@ function onPlayerStateChange(event) {
         console.log(songOwner);
         var nextUp= party_val.nextUp;
 
-        nextUpTrack= guest_list[songOwner].playlist[nextUp];
-        loadNextSong(guest_list, nextUpTrack, songOwner, true, songOwner===myName);
+        if (nextUp) {
+            nextUpTrack= guest_list[songOwner].playlist[nextUp];
+            loadNextSong(guest_list, nextUpTrack, songOwner, true, songOwner===myName);
+        }
       }
     })
 

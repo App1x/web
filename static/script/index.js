@@ -69,27 +69,30 @@ function show_my_page() {
 }
 
 function leave_party() {
-	var name= this.myName;
-	this.guestList.transaction(function(guest_list) {
+	var name= myName;
+	guestList.transaction(function(guest_list) {
 		return removeNode(guest_list, guest_list[name]);
 	}).then(function(data) {
 		var partySize= data.snapshot.numChildren();  //shut down party if empty
 		if (partySize===0) {
-			this.party.remove();
+			party.remove();
 		}
+
+		$("#list_my_songs").html("")
+		$("#list_next_songs").html("")
+		player.loadVideoById(null);
+
+		myPlaylist.off('value');
+		guestList.off('value');
+
+		party= null;
+		guestList= null;
+		myName= null;
+		myStuff= null;
+		myPlaylist= null;
+
+		noSongPlaying= true;
 	})
-	$("#list_my_songs").html("")
-	$("#list_next_songs").html("")
-	player.loadVideoById(null);
-
-	this.myPlaylist.off('value');
-	this.guestList.off('value');
-
-	var party= null;
-	var guestList= null;
-	var myName= null;
-	var myStuff= null;
-	var myPlaylist= null;
 	show_login_page();
 }
 
@@ -228,14 +231,20 @@ function create_or_join_party(partyName, password, guestName) {
 					var nextGuestName= currentGuest.next;
 					currentGuest= guest_list[nextGuestName];
 				}
-				if (!nextUpTrack) party.update({nextUp: null, songOwner: null, currentlyPlaying: null});
+				if (!nextUpTrack) {
+					party.update({nextUp: null, songOwner: null});
+					// noSongPlaying= true;
+				}
 				$("#list_next_tracks").html(track_html_listing_header()+list_html.join("\n"));
 			})
 
 			//listen for next up change (non host)
 			party.child("currentlyPlaying").on('value', function(data) {
-				if (data && !amPartyHost) {
+				if (data && data.val() && !amPartyHost) {
 					loadSpecificTrack(data.val());
+				} else if (!data.val()) {
+					player.loadVideoById(null);
+					noSongPlaying= true;
 				}
 			})
 
@@ -261,7 +270,7 @@ function search_song(track, page=1, limit=5) {
 		url: url,
 		data: {q:q.join("+"), type:type.join(","), limit:limit, offset:(limit*(page-1))},
 		success: function(data) {
-			console.log(data);
+			// console.log(data);
 
 			var html= [];
 			$.each(data.tracks.items, function(index, track) {

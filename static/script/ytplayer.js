@@ -24,6 +24,7 @@ function onYouTubeIframeAPIReady() {
 //    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.ENDED && amPartyHost) {
+        party.update({currentlyPlaying: null});
         loadNextSong();
     }
 
@@ -46,9 +47,10 @@ function loadNextSong() {
                 // loadNextSong(nextUpTrack, songOwner, true);
                 party.update({currentlyPlaying: nextUpTrack});
 
-                // console.log(nextUpTrack);
                 loadSpecificTrack(nextUpTrack);
                 if (amPartyHost) remove_track(JSON.stringify(nextUpTrack), songOwner, true);
+            } else {
+                player.loadVideoById(null);
             }
         }
     })
@@ -62,7 +64,6 @@ function loadSpecificTrack(track) {
     });
 
     request.execute(function(response) {
-        // console.log(response);
         player.loadVideoById(response.items[0].id.videoId);
     });
 }

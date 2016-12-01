@@ -24,20 +24,7 @@ function onYouTubeIframeAPIReady() {
 //    the player should play for six seconds and then stop.
 function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.ENDED) {
-        party.once('value', function(partyRef) {
-            if (partyRef) {
-                var party_val= partyRef.val();
-                var guest_list= party_val.guestList;
-
-                var songOwner= party_val.songOwner;
-                var nextUp= party_val.nextUp;
-
-                if (nextUp) {
-                    nextUpTrack= guest_list[songOwner].playlist[nextUp];
-                    loadNextSong(guest_list, nextUpTrack, songOwner, true);
-                }
-            }
-        })
+        loadNextSong();
     }
 
     if (!amPartyHost) {
@@ -45,24 +32,39 @@ function onPlayerStateChange(event) {
     }
 }
 
-function loadNextSong(guest_list, nextUpTrack, songOwner, autoplay=false) {
-  var request = gapi.client.youtube.search.list({
-    q: nextUpTrack.trackName+' '+nextUpTrack.trackArtist,
-    part: 'id, snippet',
-    type: 'video'
-  });
+function loadNextSong() {
+    party.once('value', function(partyRef) {
+        if (partyRef) {
+            var party_val= partyRef.val();
+            var guest_list= party_val.guestList;
 
-  request.execute(function(response) {
+            var songOwner= party_val.songOwner;
+            var nextUp= party_val.nextUp;
 
-    if (autoplay) {
-      player.loadVideoById(response.items[0].id.videoId);
-    } else {
-      player.cueVideoById(response.items[0].id.videoId);
-    }
+            if (nextUp) {
+                nextUpTrack= guest_list[songOwner].playlist[nextUp];
+                // loadNextSong(nextUpTrack, songOwner, true);
+                party.update({currentlyPlaying: nextUpTrack});
 
-    remove_track(JSON.stringify(nextUpTrack), songOwner, true);
+                // console.log(nextUpTrack);
+                loadSpecificTrack(nextUpTrack);
+                if (amPartyHost) remove_track(JSON.stringify(nextUpTrack), songOwner, true);
+            }
+        }
+    })
+}
 
-  });
+function loadSpecificTrack(track) {
+    var request = gapi.client.youtube.search.list({
+        q: track.trackName+' '+track.trackArtist,
+        part: 'id, snippet',
+        type: 'video'
+    });
+
+    request.execute(function(response) {
+        // console.log(response);
+        player.loadVideoById(response.items[0].id.videoId);
+    });
 }
 
 

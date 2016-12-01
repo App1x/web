@@ -184,6 +184,7 @@ function create_or_join_party(partyName, password, guestName) {
 				$("#list_my_tracks").html(track_html_listing_header()+list_html.join("\n"));
 			})
 
+			//listen to guest or playlist changes
 			guestList.on('value', function(data) {
 
 				var guest_list= data.val();
@@ -205,18 +206,36 @@ function create_or_join_party(partyName, password, guestName) {
 							party.update({nextUp: nextTrack.id, songOwner: songOwner}).then(function(data) {
 								if (noSongPlaying || player.getPlayerState()==YT.PlayerState.ENDED) {
 									noSongPlaying= false;
-									loadNextSong(guest_list, nextUpTrack, songOwner, true);
+
+									var currentlyPlaying= null;
+									party.child("currentlyPlaying").once('value', function(data) {
+										if (data) {
+											currentlyPlaying= data.val();
+										}
+									}).then(function(data) {
+										if (currentlyPlaying) {
+											loadSpecificTrack(data.val());
+										} else if (amPartyHost) {
+											loadNextSong();
+										}
+									})
 								}
 							});
 						}
 						list_html.push(track_html_listing(nextTrack, null, 1-(++odd)===0));
-					} else {
-						party.update({nextUp: null, songOwner: null});
 					}
 					var nextGuestName= currentGuest.next;
 					currentGuest= guest_list[nextGuestName];
 				}
+				if (!nextUpTrack) party.update({nextUp: null, songOwner: null, currentlyPlaying: null});
 				$("#list_next_tracks").html(track_html_listing_header()+list_html.join("\n"));
+			})
+
+			//listen for next up change (non host)
+			party.child("currentlyPlaying").on('value', function(data) {
+				if (data && !amPartyHost) {
+					loadSpecificTrack(data.val());
+				}
 			})
 
 			show_play_page();

@@ -1,6 +1,7 @@
 
 /*#upnext_text{width:70%;}*/
 /*#manage_button{width:20%;}*/
-.djparty-input{color:white;}
+.djparty-white{color:white;}
+.djparty-input::-webkit-input-placeholder{color:black;}
 .djparty-whole{width:99.99999%;}
 iframe>body * { pointer-events: none;}{pointer-events:none;}

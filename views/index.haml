@@ -13,6 +13,7 @@
 %script{:src=> "script/ytplayer.js", :type=> "text/javascript"}
 %script{:src=> "script/nodeTrackClass.js", :type=> "text/javascript"}
 %script{:src=> "script/index.js", :type=> "text/javascript"}
+%script{:src=> "script/settings.js", :type=> "text/javascript"}
 %script{:src=> "https://apis.google.com/js/client.js?onload=googleApiClientReady"}
 %script{:src=> "https://apis.google.com/js/api.js"}
 
@@ -28,15 +29,16 @@
 					%h1{}DjParty
 				%button{:id=> "login-link", :class=> "pre-auth"}Login
 				%div{:class=>"w3-padding-64 post-auth", :hidden=> true}
-					%input{:id=> "partyname", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter the party's name"}
+					%input{:id=> "partyname", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter the party's name"}
 					%br
-					%input{:id=> "partypass", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter password"}
+					%input{:id=> "partypass", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter password"}
 					%br
-					%input{:id=> "username", :class=>"w3-transparent w3-text-shadow djparty-input", :type=> "text", :placeholder=> "Enter your username"}
+					%input{:id=> "username", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter your username"}
 					%button{:onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())", :class=>"w3-btn w3-btn-block w3-hover-brown w3-padding-16"}Create or join party!
 
 	%div{:id=> "play_page", :hidden=> true}
 		%div{:class=>"djparty-whole w3-indigo w3-container", :style=>"min-height:800px"}
+			%button{:class=> "w3-btn-floating w3-right", :onclick=> "show_settings_page()"}⚙
 			%div{:class=>"w3-padding-64 w3-center"}
 				%h2{}Now Playing
 				%div{:id=> "player"}
@@ -67,6 +69,15 @@
 					%button{:id=> "clear_button", :class=>"w3-btn w3-btn-bar w3-hover-sand w3-padding-16", :onclick=> "$('#search_results').html('')"}Clear
 				%div{:class=>"w3-container w3-responsive "}
 					%table{:id=> "search_results", :class=>"w3-table-all w3-center"}
+
+	%div{:id=> "settings_page", :hidden=> true}
+		%div{:class=>"djparty-whole w3-amber w3-container w3-center", :style=>"height:700px"}
+			%button{:class=> "w3-btn-floating w3-left", :onclick=> "show_play_page()"}⇦
+			%div{:class=>"w3-padding-64 w3-center"}
+				%h2{}Settings
+				%div{:id=> "transfer_host", :class=>"w3-container w3-responsive"}
+					%input{:id=> "transfer_host_input", :class=>"djparty-input", :type=> "text", :placeholder=> "Transfer host priveleges to..."}
+					%button{:id=> "transfer_host_button", :onclick=> 'transfer_host($("#transfer_host_input").val())'}Transfer
 
 
 

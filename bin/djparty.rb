@@ -1,22 +1,22 @@
 require 'sinatra'
 require 'haml'
 # require 'rspotify'
-require 'json'
+# require 'json'
 
 set :port, 8080
 set :static, true
 set :public_folder, "static"
 set :views, "views"
 
-def generateRandomString(length)
-	text = ''
-	possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+# def generateRandomString(length)
+# 	text = ''
+# 	possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-	length.times do |i|
-		text += possible[Random.rand(possible.length)]
-	end
-	return text;
-end
+# 	length.times do |i|
+# 		text += possible[Random.rand(possible.length)]
+# 	end
+# 	return text;
+# end
 
 get '/' do
     haml :index

@@ -54,18 +54,47 @@ function show_login_page() {
 	$("#login_page").show();
 	$("#play_page").hide();
 	$("#my_page").hide();
+	$("#settings_page").hide();
 }
 
 function show_play_page() {
 	$("#login_page").hide();
 	$("#play_page").show();
 	$("#my_page").hide();
+	$("#settings_page").hide();
 }
 
 function show_my_page() {
 	$("#login_page").hide();
 	$("#play_page").hide();
 	$("#my_page").show();
+	$("#settings_page").hide();
+}
+
+function show_settings_page() {
+	$("#login_page").hide();
+	$("#play_page").hide();
+	$("#my_page").hide();
+	$("#settings_page").show();
+}
+
+function am_host() {
+	amPartyHost= true;
+	$("#transfer_host_input").attr("placeholder", "Transfer host priveleges to...");
+	$("#transfer_host_input").attr("disabled", false);
+	$("#transfer_host_button").attr("disabled", false);
+	// $("#transfer_host_button").click(function() {transfer_host($("#transfer_host_input"))})
+	party.child("currentlyPlaying").once('value', function(data) {
+		loadCurrentlyPlaying(data);
+	})
+}
+
+function am_not_host() {
+	amPartyHost= false;
+	$("#transfer_host_input").attr("placeholder", "You cannot transfer host privileges");
+	$("#transfer_host_input").attr("disabled", true);
+	$("#transfer_host_button").attr("disabled", true);
+    player.pauseVideo();
 }
 
 function leave_party() {
@@ -170,6 +199,8 @@ function create_or_join_party(partyName, password, guestName) {
 			//save party host
 			if (amPartyHost) {
 				party.update({host: myName});
+			} else {
+				am_not_host();
 			}
 
 			//update my playlist
@@ -240,11 +271,23 @@ function create_or_join_party(partyName, password, guestName) {
 
 			//listen for next up change (non host)
 			party.child("currentlyPlaying").on('value', function(data) {
-				if (data && data.val() && !amPartyHost) {
-					loadSpecificTrack(data.val());
-				} else if (!data.val()) {
-					player.loadVideoById(null);
-					noSongPlaying= true;
+				loadCurrentlyPlaying(data);
+				// if (data && data.val() && !amPartyHost) {
+				// 	loadSpecificTrack(data.val());
+				// } else if (!data.val()) {
+				// 	player.loadVideoById(null);
+				// 	noSongPlaying= true;
+				// }
+			})
+
+			//listen for host
+			party.child("host").on('value', function(data) {
+				if (data && data.val()) {
+					if (data.val()==myName) {
+						am_host();
+					} else {
+						am_not_host();
+					}
 				}
 			})
 

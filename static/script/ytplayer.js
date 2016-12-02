@@ -56,6 +56,20 @@ function loadNextSong() {
     })
 }
 
+function loadCurrentlyPlaying(currentlyPlayingRef) {
+    if (currentlyPlayingRef && currentlyPlayingRef.val()) {
+        loadSpecificTrack(currentlyPlayingRef.val());
+        if (amPartyHost) {
+            player.playVideo();
+        } else {
+            player.pauseVideo();
+        }
+    } else if (!currentlyPlayingRef.val()) {
+        player.loadVideoById(null);
+        noSongPlaying= true;
+    }
+}
+
 function loadSpecificTrack(track) {
     var request = gapi.client.youtube.search.list({
         q: track.trackName+' '+track.trackArtist,

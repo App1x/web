@@ -64,6 +64,7 @@ function loadCurrentlyPlaying(currentlyPlayingRef) {
         } else {
             player.pauseVideo();
         }
+        noSongPlaying= false;
     } else if (!currentlyPlayingRef.val()) {
         player.loadVideoById(null);
         noSongPlaying= true;

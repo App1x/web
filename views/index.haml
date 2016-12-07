@@ -66,7 +66,7 @@
 					/ %input{:id=> "album_search", :type=> "text", :placeholder=> "Search by album"}
 					/ %br
 					%button{:id=> "search_button", :class=>"w3-btn w3-btn-bar w3-hover-sand w3-padding-16", :onclick=> "search_song($('#search_input').val())"}Search
-					%button{:id=> "clear_button", :class=>"w3-btn w3-btn-bar w3-hover-sand w3-padding-16", :onclick=> "$('#search_results').html('')"}Clear
+					%button{:id=> "clear_button", :class=>"w3-btn w3-btn-bar w3-hover-sand w3-padding-16", :onclick=> "$('#search_results').html(''); $('#search_input').val('')"}Clear
 				%div{:class=>"w3-container w3-responsive "}
 					%table{:id=> "search_results", :class=>"w3-table-all w3-center"}
 

@@ -76,6 +76,7 @@ function loadSpecificTrack(track) {
         q: track.trackName+' '+track.trackArtist,
         part: 'id, snippet',
         type: 'video'
+        //videoCategoryId: 10 //music
     });
 
     request.execute(function(response) {

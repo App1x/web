@@ -51,10 +51,12 @@ function isEmpty(abc) {
 }
 
 function show_login_page() {
+	if (party) leave_party();
 	$("#login_page").show();
 	$("#play_page").hide();
 	$("#my_page").hide();
 	$("#settings_page").hide();
+	window.location.hash= "login";
 }
 
 function show_play_page() {
@@ -62,6 +64,7 @@ function show_play_page() {
 	$("#play_page").show();
 	$("#my_page").hide();
 	$("#settings_page").hide();
+	window.location.hash= "play";
 }
 
 function show_my_page() {
@@ -69,6 +72,7 @@ function show_my_page() {
 	$("#play_page").hide();
 	$("#my_page").show();
 	$("#settings_page").hide();
+	window.location.hash= "my";
 }
 
 function show_settings_page() {
@@ -76,6 +80,7 @@ function show_settings_page() {
 	$("#play_page").hide();
 	$("#my_page").hide();
 	$("#settings_page").show();
+	window.location.hash= "settings";
 }
 
 function am_host() {
@@ -121,8 +126,9 @@ function leave_party() {
 		myPlaylist= null;
 
 		noSongPlaying= true;
+
+		// show_login_page();
 	})
-	show_login_page();
 }
 
 function track_html_listing_header() {

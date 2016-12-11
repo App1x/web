@@ -28,13 +28,13 @@
 				%div{:class=>"w3-padding-64"}
 					%h1{}DjParty
 				%button{:id=> "login-link", :class=> "pre-auth"}Allow Permissions
-				%div{:class=>"w3-padding-64 post-auth", :hidden=> true}
+				%div{:id=> "login_fields", :class=>"w3-padding-64 post-auth", :hidden=> true}
 					%input{:id=> "partyname", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter the party's name"}
 					%br
 					%input{:id=> "partypass", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter password"}
 					%br
 					%input{:id=> "username", :class=>"w3-transparent w3-text-shadow djparty-white", :type=> "text", :placeholder=> "Enter your username"}
-					%button{:onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())", :class=>"w3-btn w3-btn-block w3-hover-brown w3-padding-16"}Create or join party!
+					%button{:id=> "join_party_button", :onclick=> "create_or_join_party($('#partyname').val(), $('#partypass').val(), $('#username').val())", :class=>"w3-btn w3-btn-block w3-hover-brown w3-padding-16"}Create or join party!
 
 	%div{:id=> "play_page", :hidden=> true}
 		%div{:class=>"djparty-whole w3-indigo w3-container", :style=>"min-height:800px"}
@@ -47,12 +47,12 @@
 					%button{:onclick=> "show_my_page()", :class=>"w3-btn w3-btn-bar w3-hover-khaki w3-padding-16"}Manage your playlist >>>
 				%div{:class=>"w3-container w3-responsive"}
 					%table{:id=> "list_next_tracks", :class=>"w3-table-all w3-center"}
-				%button{:id=> "leave_party_button", :class=>"w3-btn w3-btn-block w3-hover-red w3-padding-16 w3-margin-top", :onclick=> "leave_party()"}Leave Party
+				%button{:id=> "leave_party_button", :class=>"w3-btn w3-btn-block w3-hover-red w3-padding-16 w3-margin-top", :onclick=> "show_login_page()"}Leave Party
 
 
 	%div{:id=> "my_page", :hidden=> true}
 		%div{:class=>"djparty-whole w3-blue-grey w3-container w3-center", :style=>"height:700px"}
-			%button{:class=> "w3-btn-floating w3-left", :onclick=> "show_play_page()"}⇦
+			%button{:class=> "w3-btn-floating w3-left", :onclick=> "window.history.back()"}⇦
 			%div{:class=>"w3-padding-64 w3-center"}
 				%h2{}My Playlist
 				%div{:class=>"w3-container w3-responsive"}
@@ -72,13 +72,51 @@
 
 	%div{:id=> "settings_page", :hidden=> true}
 		%div{:class=>"djparty-whole w3-amber w3-container w3-center", :style=>"height:700px"}
-			%button{:class=> "w3-btn-floating w3-left", :onclick=> "show_play_page()"}⇦
+			%button{:class=> "w3-btn-floating w3-left", :onclick=> "window.history.back()"}⇦
 			%div{:class=>"w3-padding-64 w3-center"}
 				%h2{}Settings
 				%div{:id=> "transfer_host", :class=>"w3-container w3-responsive"}
 					%input{:id=> "transfer_host_input", :class=>"djparty-input", :type=> "text", :placeholder=> "Transfer host priveleges to..."}
 					%button{:id=> "transfer_host_button", :onclick=> 'transfer_host($("#transfer_host_input").val())'}Transfer
 
+:javascript
+	window.onload = function(){
+	    show_login_page();
+	}
+
+	window.onhashchange = function(){
+		if (party) {
+			var hash = (window.location.hash).replace('#', '');
+			switch(hash) {
+				case "login":
+					if (!$("#login_page").is(":visible") ) show_login_page();
+					break;
+				case "play":
+					show_play_page();
+					break;
+				case "my":
+					show_my_page();
+					break;
+				case "settings":
+					show_settings_page();
+					break;
+			}
+		} else {
+			show_login_page();
+		}
+	}
+
+	$("#login_fields").keyup(function(event){
+	    if(event.keyCode == 13){
+	        $("#join_party_button").click();
+	    }
+	});
+	$("#search_input").keyup(function(event){
+	    if(event.keyCode == 13){
+	        $("#search_button").click();
+	    }
+	});
+	
 
 
 

@@ -3,7 +3,7 @@ GEM
   specs:
     haml (4.0.7)
       tilt
-    json (1.7.7)
+    json (2.0.2)
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
@@ -22,7 +22,7 @@ DEPENDENCIES
   sinatra
 
 RUBY VERSION
-   ruby 2.0.0p648
+   ruby 2.3.0p0
 
 BUNDLED WITH
    1.13.6

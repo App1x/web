@@ -51,7 +51,6 @@ function isEmpty(abc) {
 }
 
 function show_login_page() {
-	console.log(party);
 	if (party) leave_party();
 	$("#login_page").show();
 	$("#play_page").hide();

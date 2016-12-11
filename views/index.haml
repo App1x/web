@@ -9,7 +9,6 @@
 %link{:href=> "style/w3.css", :rel=>"stylesheet"}
 %link{:href=> "style/index.css", :rel=>"stylesheet"}
 %script{:src=> "script/auth.js", :type=> "text/javascript"}
-/ %script{:src=> "script/search.js", :type=> "text/javascript"}
 %script{:src=> "script/ytplayer.js", :type=> "text/javascript"}
 %script{:src=> "script/nodeTrackClass.js", :type=> "text/javascript"}
 %script{:src=> "script/index.js", :type=> "text/javascript"}
@@ -89,16 +88,16 @@
 			var hash = (window.location.hash).replace('#', '');
 			switch(hash) {
 				case "login":
-					if (!$("#login_page").is(":visible") ) show_login_page();
+					if (!$("#login_page").is(":visible")) show_login_page();
 					break;
 				case "play":
-					show_play_page();
+					if (!$("#play_page").is(":visible")) show_play_page();
 					break;
 				case "my":
-					show_my_page();
+					if (!$("#my_page").is(":visible")) show_my_page();
 					break;
 				case "settings":
-					show_settings_page();
+					if (!$("#settings_page").is(":visible")) show_settings_page();
 					break;
 			}
 		} else {

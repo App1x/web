@@ -75,8 +75,10 @@ function loadSpecificTrack(track) {
     var request = gapi.client.youtube.search.list({
         q: track.trackName+' '+track.trackArtist,
         part: 'id, snippet',
-        type: 'video'
-        //videoCategoryId: 10 //music
+        type: 'video',
+        // topicId: '/m/04rlf',
+        // videoCategoryId: 10, //music
+        safeSearch: 'none'
     });
 
     request.execute(function(response) {

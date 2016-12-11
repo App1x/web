@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'haml'
-# require 'rspotify'
-# require 'json'
+require 'net/http'
+require 'json'
 
 set :port, 8080
 set :static, true
@@ -20,6 +20,20 @@ set :views, "views"
 
 get '/' do
     haml :index
+end
+
+get '/loadVideo' do
+	uri = URI("https://www.youtube.com/results")
+	search_params = { :search_query=> params[:q] }
+	uri.query = URI.encode_www_form(search_params)
+
+	response = Net::HTTP.get_response(uri)
+
+	videoId= response.body.match(/watch\?v=(.+?)"/).captures.first
+
+	res= {:videoId=> videoId}
+	return res.to_json
+
 end
 
 # get '/spotify_search' do

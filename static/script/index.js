@@ -321,6 +321,7 @@ function search_song(track, page=1, limit=5) {
 		success: function(data) {
 			// console.log(data);
 
+			var songAndArtists= [];
 			var html= [];
 			$.each(data.tracks.items, function(index, track) {
 				var trackName= track.name;
@@ -335,7 +336,11 @@ function search_song(track, page=1, limit=5) {
 				var newTrack= new Track(uri, trackName, artists, duration);
 				var rowElement= track_html_listing(newTrack, "+", (index+1)%2===1)
 
-				html.push(rowElement);
+				var songAndArtist= trackName + artists;
+				if (songAndArtists.indexOf(songAndArtist)===-1) {  //if track name and artist is not already added
+					html.push(rowElement);
+					songAndArtists.push(songAndArtist);
+				}
 			});
 
 			$("#search_results").html(track_html_listing_header()+html);

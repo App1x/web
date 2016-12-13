@@ -47,7 +47,7 @@ function insertNode(linkedList, node, position) {
 	} else {
 		var currentNode= findHead(linkedList);
 		var index= 0;
-		while (currentNode.next!=null && index<(position-1)) {
+		while (++index<position) {
 			currentNode= linkedList[currentNode.next];
 		}
 		linkedList[currentNode.next].previous= node.id;

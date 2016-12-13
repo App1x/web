@@ -155,7 +155,7 @@ function track_html_listing(track, add_or_remove, odd, moveable) {
 	if (add_or_remove=="-") func= "remove";
 
 	var moveableIconTd= jQuery('<td/>', {
-		class: "ui-sortable-handle"
+		class: "moveThis"
 	}).append(jQuery('<span/>', {
 		class: "ui-icon ui-icon-grip-dotted-vertical",
 		text: "hi"
@@ -246,7 +246,7 @@ function create_or_join_party(partyName, password, guestName) {
 				
 				$("#list_my_tracks").html(html_table(track_html_listing_header(true),list_html.join("\n")));
 				$("#list_my_tracks>tbody").sortable({
-					// handle: ".ui-icon-grip-dotted-vertical",
+					handle: ".moveThis",
 			        stop: function(event, ui) {
 			        	movedTrack= JSON.parse($($(ui.item[0]).find("button")[0]).attr("track"));
 			        	newPosition= ui.item.index();

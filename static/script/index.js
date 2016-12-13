@@ -131,8 +131,13 @@ function leave_party() {
 	})
 }
 
-function track_html_listing_header() {
+function track_html_listing_header(moveable) {
 	var tr= jQuery('<tr/>');
+	if (moveable) {
+		jQuery('<th/>', {
+			text: ""
+		}).appendTo(tr);
+	}
 	$.each(["Title", "Artist", ""], function(index, header) {
 		jQuery('<th/>', {
 			text: header
@@ -142,13 +147,22 @@ function track_html_listing_header() {
 	return tr.prop("outerHTML");
 }
 
-function track_html_listing(track, add_or_remove, odd) {
+function track_html_listing(track, add_or_remove, odd, moveable) {
 	var trackTr= jQuery('<tr/>');
 	// if (odd) trackTr.addClass("w3-white");
 
 	func= "add";
 	if (add_or_remove=="-") func= "remove";
 
+	var moveableIconTd= jQuery('<td/>', {
+		class: "ui-sortable-handle"
+	}).append(jQuery('<span/>', {
+		class: "ui-icon ui-icon-grip-dotted-vertical",
+		text: "hi"
+	}));
+	// var moveableIcon= jQuery('<span/>', {
+	// 	class: "ui-icon ui-icon-grip-dotted-vertical"
+	// });
 	var trackNameTd= jQuery('<td/>', {
 		text: track.trackName
 	});
@@ -162,6 +176,10 @@ function track_html_listing(track, add_or_remove, odd) {
 		text: add_or_remove
 	});
 
+	if (moveable) {
+		moveableIconTd.appendTo(trackTr);
+		// moveableIcon.prependTo(trackNameTd);
+	}
 	trackNameTd.appendTo(trackTr);
 	trackArtistTd.appendTo(trackTr);
 	if (add_or_remove) {
@@ -221,13 +239,14 @@ function create_or_join_party(partyName, password, guestName) {
 				var currentTrack= findHead(tracks);
 				var odd= 0;
 				while (currentTrack!=null) {
-					list_html.push(track_html_listing(currentTrack, "-", 1-(++odd)===0));
+					list_html.push(track_html_listing(currentTrack, "-", 1-(++odd)===0, true));
 					var nextTrackName= currentTrack.next;
 					currentTrack= tracks[nextTrackName];
 				}
 				
-				$("#list_my_tracks").html(html_table(track_html_listing_header(),list_html.join("\n")));
+				$("#list_my_tracks").html(html_table(track_html_listing_header(true),list_html.join("\n")));
 				$("#list_my_tracks>tbody").sortable({
+					// handle: ".ui-icon-grip-dotted-vertical",
 			        stop: function(event, ui) {
 			        	movedTrack= JSON.parse($($(ui.item[0]).find("button")[0]).attr("track"));
 			        	newPosition= ui.item.index();
@@ -276,7 +295,7 @@ function create_or_join_party(partyName, password, guestName) {
 								}
 							});
 						}
-						list_html.push(track_html_listing(nextTrack, null, 1-(++odd)===0));
+						list_html.push(track_html_listing(nextTrack, null, 1-(++odd)===0, false));
 					}
 					var nextGuestName= currentGuest.next;
 					currentGuest= guest_list[nextGuestName];
@@ -285,7 +304,7 @@ function create_or_join_party(partyName, password, guestName) {
 					party.update({nextUp: null});
 					// noSongPlaying= true;
 				}
-				$("#list_next_tracks").html(html_table(track_html_listing_header(), list_html.join("\n")));
+				$("#list_next_tracks").html(html_table(track_html_listing_header(false), list_html.join("\n"), false));
 			})
 
 			//listen for next up change (non host)
@@ -347,7 +366,7 @@ function search_song(track, page=1, limit=5) {
 				var duration= Math.floor((track.duration_ms/1000)/120)+':'+Math.floor((track.duration_ms/1000)%120);
 
 				var newTrack= new Track(uri, trackName, artists, duration);
-				var rowElement= track_html_listing(newTrack, "+", (index+1)%2===1)
+				var rowElement= track_html_listing(newTrack, "+", (index+1)%2===1, false)
 
 				var songAndArtist= trackName + artists;
 				if (songAndArtists.indexOf(songAndArtist)===-1) {  //if track name and artist is not already added
@@ -356,7 +375,7 @@ function search_song(track, page=1, limit=5) {
 				}
 			});
 
-			$("#search_results").html(html_table(track_html_listing_header(), html));
+			$("#search_results").html(html_table(track_html_listing_header(false), html));
 		},
 		error: function(error) {
 			console.log(error);

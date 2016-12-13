@@ -74,14 +74,17 @@ function removeNode(linkedList, node) {
 	return linkedList;
 }
 
-function cycleNodes(linkedList) {
+function cycleNodes(linkedList, nextUp=null) {
 	if (Object.keys(linkedList).length > 1) {
-		var head= findHead(linkedList);
-		var tail= findTail(linkedList);
-		linkedList[head.next].previous= null;
-		linkedList[head.id].next= null;
-		linkedList[head.id].previous= tail.id;
-		linkedList[tail.id].next= head.id;
+		do {
+			var head= findHead(linkedList);
+			var tail= findTail(linkedList);
+			linkedList[head.next].previous= null;
+			linkedList[head.id].next= null;
+			linkedList[head.id].previous= tail.id;
+			linkedList[tail.id].next= head.id;
+			if (nextUp==null) break;
+		} while (head.id!=nextUp)
 	}
 	return linkedList;
 }

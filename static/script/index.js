@@ -233,7 +233,7 @@ function create_or_join_party(partyName, password, guestName) {
 
 				//populate next up
 				var nextUpTrack= null;
-				var songOwner= null;
+				var nextInLine= null;
 				var list_html= [];
 				var odd= 0;
 				currentGuest= headGuest;
@@ -242,9 +242,9 @@ function create_or_join_party(partyName, password, guestName) {
 					if (nextTrack) {
 						if (list_html.length==0) {
 							nextUpTrack= nextTrack;
-							songOwner= currentGuest.id;
+							nextInLine= currentGuest.id;
 
-							party.update({nextUp: nextTrack.id, songOwner: songOwner}).then(function(data) {
+							party.update({nextUp: nextTrack.id, nextInLine: nextInLine}).then(function(data) {
 								if (noSongPlaying || player.getPlayerState()==YT.PlayerState.ENDED) {
 									noSongPlaying= false;
 
@@ -269,7 +269,7 @@ function create_or_join_party(partyName, password, guestName) {
 					currentGuest= guest_list[nextGuestName];
 				}
 				if (!nextUpTrack) {
-					party.update({nextUp: null, songOwner: null});
+					party.update({nextUp: null});
 					// noSongPlaying= true;
 				}
 				$("#list_next_tracks").html(track_html_listing_header()+list_html.join("\n"));
@@ -375,8 +375,16 @@ function remove_track(track, username=myName, cycleGuests=false) {
 		
 		return guest_list;
 	}).then(function(guestListRef) {
-		var guest_list= guestListRef.snapshot.val();
-	    party.update({guestList: cycleNodes(guest_list)});
+		if (cycleGuests) {
+			var guest_list= guestListRef.snapshot.val();
+			var nextInLine= null;
+			party.once('value', function(partyRef) {
+				party_obj= partyRef.val()
+				nextInLine= party_obj.nextInLine;
+			}).then(function(partyRef) {
+			    party.update({guestList: cycleNodes(guest_list, nextInLine)});
+			})
+		}
 	});
 }
 

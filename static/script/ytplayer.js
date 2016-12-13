@@ -39,16 +39,16 @@ function loadNextSong() {
             var party_val= partyRef.val();
             var guest_list= party_val.guestList;
 
-            var songOwner= party_val.songOwner;
+            var nextInLine= party_val.nextInLine;
             var nextUp= party_val.nextUp;
 
             if (nextUp) {
-                nextUpTrack= guest_list[songOwner].playlist[nextUp];
-                // loadNextSong(nextUpTrack, songOwner, true);
+                nextUpTrack= guest_list[nextInLine].playlist[nextUp];
+                // loadNextSong(nextUpTrack, nextInLine, true);
                 party.update({currentlyPlaying: nextUpTrack});
 
                 loadSpecificTrack(nextUpTrack);
-                if (amPartyHost) remove_track(JSON.stringify(nextUpTrack), songOwner, true);
+                if (amPartyHost) remove_track(JSON.stringify(nextUpTrack), nextInLine, true);
             } else {
                 player.loadVideoById(null);
             }

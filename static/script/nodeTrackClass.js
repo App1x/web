@@ -34,23 +34,26 @@ function insertNode(linkedList, node, position) {
 		return linkedList;
 	}
 
-	if (position==="start" || position==="beginning") {
+	if (position==="start" || position==="beginning" || position===0) {
 		var headNode= findHead(linkedList);
+		node.previous= null;
 		headNode.previous= node.id;
 		node.next= headNode.id;
-	} else if (position==="end") {
+	} else if (position==="end" || position===(Object.keys(linkedList).length)) {
 		var endNode= findTail(linkedList);
+		node.next= null;
 		endNode.next= node.id;
 		node.previous= endNode.id;
 	} else {
 		var currentNode= findHead(linkedList);
 		var index= 0;
-		while (currentNode.next!=null && index<position) {
+		while (currentNode.next!=null && index<(position-1)) {
 			currentNode= linkedList[currentNode.next];
 		}
+		linkedList[currentNode.next].previous= node.id;
 		node.next= currentNode.next;
-		currentNode.next= node.id;
 		node.previous= currentNode.id;
+		currentNode.next= node.id;
 	}
 	linkedList[node.id]= node;
 	return linkedList;
@@ -66,7 +69,8 @@ function removeNode(linkedList, node) {
 		if (currentNode.id===node.id) {
 			if (node.previous!=null) linkedList[node.previous].next= node.next || null;
 			if (node.next!=null) linkedList[node.next].previous= node.previous || null;
-			linkedList[node.id]= null;
+			delete linkedList[node.id];
+			// linkedList[node.id]= null;
 			break;
 		}
 		currentNode= linkedList[currentNode.next];
@@ -88,6 +92,11 @@ function cycleNodes(linkedList, nextUp=null) {
 	}
 	return linkedList;
 }
+
+// function changePosition(linkedList, fromPos, toPos) {
+// 	removeNode(fromPos);
+// 	insertNode
+// }
 //end class Node
 
 //class Track

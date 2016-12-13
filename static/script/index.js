@@ -173,6 +173,10 @@ function track_html_listing(track, add_or_remove, odd) {
 	return trackTr.prop("outerHTML");
 }
 
+function html_table(bodyHead, bodyRows) {
+	return "<thead>"+bodyHead+"</thead><tbody>"+bodyRows+"</tbody>"
+}
+
 function create_or_join_party(partyName, password, guestName) {
 
 	var got_in= true
@@ -222,7 +226,16 @@ function create_or_join_party(partyName, password, guestName) {
 					currentTrack= tracks[nextTrackName];
 				}
 				
-				$("#list_my_tracks").html(track_html_listing_header()+list_html.join("\n"));
+				$("#list_my_tracks").html(html_table(track_html_listing_header(),list_html.join("\n")));
+				$("#list_my_tracks>tbody").sortable({
+			        stop: function(event, ui) {
+			        	movedTrack= JSON.parse($($(ui.item[0]).find("button")[0]).attr("track"));
+			        	newPosition= ui.item.index();
+			        	tracks= removeNode(tracks, movedTrack);
+			        	tracks= insertNode(tracks, movedTrack, newPosition);
+			            myStuff.update({playlist: tracks});
+				    }
+				});
 			})
 
 			//listen to guest or playlist changes
@@ -272,7 +285,7 @@ function create_or_join_party(partyName, password, guestName) {
 					party.update({nextUp: null});
 					// noSongPlaying= true;
 				}
-				$("#list_next_tracks").html(track_html_listing_header()+list_html.join("\n"));
+				$("#list_next_tracks").html(html_table(track_html_listing_header(), list_html.join("\n")));
 			})
 
 			//listen for next up change (non host)
@@ -343,7 +356,7 @@ function search_song(track, page=1, limit=5) {
 				}
 			});
 
-			$("#search_results").html(track_html_listing_header()+html);
+			$("#search_results").html(html_table(track_html_listing_header(), html));
 		},
 		error: function(error) {
 			console.log(error);

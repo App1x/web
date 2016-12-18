@@ -3,6 +3,7 @@ require 'haml'
 require 'net/http'
 require 'json'
 
+# set :bind, '0.0.0.0'
 set :port, 8080
 set :static, true
 set :public_folder, "static"
@@ -24,6 +25,7 @@ end
 
 get '/loadVideo' do
 	uri = URI("https://www.youtube.com/results")
+	# search_params = { :sp=> "EgIYAQ%253D%253D", :search_query=> params[:q]+" -album" }
 	search_params = { :search_query=> params[:q] }
 	uri.query = URI.encode_www_form(search_params)
 
@@ -36,59 +38,47 @@ get '/loadVideo' do
 
 end
 
-# get '/spotify_search' do
-# 	track= params[:track] if params[:track]!=""
-# 	artist= params[:artist] if params[:artist]!=""
-# 	album= params[:album] if params[:album]!=""
-# 	page= params[:page] || 1
-# 	limit= params[:limit] || 5
+get '/join' do
+	@partyName= params[:partyName]
+	@partyPass= params[:partyPass]
+	@guestName= params[:guestName]
 
-# 	q= []
-# 	# type= []
-# 	type= ["track"]
-# 	if track
-# 		q<<track.gsub(" ", "+")
-# 		# type<<"track"
-# 	end
-# 	if artist
-# 		q<<artist.gsub(" ", "+")
-# 		# type<<"artist"
-# 	end
-# 	if album
-# 		q<<album.gsub(" ", "+")
-# 		# type<<"album"
-# 	end
+	puts "--------"
+	puts @partyName
+	puts @guestName
+	puts "--------"
 
-# 	# q="track:#{track_query}%20artist:#{artist_query}%20album:#{album_query}&type=album,artist,track"
-# 	# results= RSpotify::Track.search(q, limit:limit, offset:(5*(page-1)) )
-# 	results= JSON.parse(`curl -X GET "https://api.spotify.com/v1/search?q=#{q.join("+")}&type=#{type.join(",")}&limit=#{limit}&offset=#{limit*(page-1)}" -H "Accept: application/json"`)
 
-# 	output= {:originalResults=> results, :localResults=> ""}
-# 	html= ""
-# 	results["tracks"]["items"].each do |track, index|
-# 		track_name= track["name"]
-# 		artists= track["artists"].map{|artist| artist["name"]}.join(", ")
-# 		uri= track["uri"]
-# 		html+= "<tr><td id='search_result#{index}' uri=#{uri}><b>#{track_name}</b> - <i>#{artists}</i></td><td><button onclick='add_song($(\"#search_result#{index}).val())'>+</button></td></tr>"
-# 	end
-# 	output[:localResults]= html
+	haml :join_api
+end
 
-# 	return output.to_json
-# end
 
-# get '/login' do
-# 	stateKey = 'spotify_auth_state'
-# 	state = generateRandomString(16)
-# 	res.cookie(stateKey, state);
 
-# 	# your application requests authorization
-# 	var scope = 'user-read-private user-read-email';
-# 	res.redirect('https://accounts.spotify.com/authorize?' +
-# 	querystring.stringify({
-# 		response_type: 'code',
-# 		client_id: client_id,
-# 		scope: scope,
-# 		redirect_uri: redirect_uri,
-# 		state: state
-# 	}));
-# end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

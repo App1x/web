@@ -18,7 +18,7 @@ firebase.auth().onAuthStateChanged(function(user) {
     // User is signed out.
     console.log('logged out');
     // ...
-    leave_party(myName);
+    // leave_party(myName);
   }
   // ...
 });

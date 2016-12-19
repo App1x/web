@@ -1,3 +1,32 @@
+// function api_leave_party() {
+// 	var name= myName;
+// 	guestList.transaction(function(guest_list) {
+// 		return removeNode(guest_list, guest_list[name]);
+// 	}).then(function(data) {
+// 		var partySize= data.snapshot.numChildren();  //shut down party if empty
+// 		if (partySize===0) {
+// 			party.remove();
+// 		}
+
+// 		$("#list_my_songs").html("")
+// 		$("#list_next_songs").html("")
+// 		player.loadVideoById(null);
+
+// 		myPlaylist.off('value');
+// 		guestList.off('value');
+
+// 		party= null;
+// 		guestList= null;
+// 		myName= null;
+// 		myStuff= null;
+// 		myPlaylist= null;
+
+// 		noSongPlaying= true;
+
+// 		// show_login_page();
+// 	})
+// }
+
 function api_create_or_join_party(partyName, password, guestName) {
 
 	var got_in= true;
@@ -22,9 +51,9 @@ function api_create_or_join_party(partyName, password, guestName) {
 		return party;
 	}).then(function(data) {
 		if (got_in) {
-			return "success";
+			$("#writesomething").html("success");
 		} else {
-			return "error";
+			$("#writesomething").html("success");
 		}
 	})
 }

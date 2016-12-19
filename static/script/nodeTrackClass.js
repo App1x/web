@@ -78,7 +78,7 @@ function removeNode(linkedList, node) {
 	return linkedList;
 }
 
-function cycleNodes(linkedList, nextUp=null) {
+function cycleNodes(linkedList, nextUp) {
 	if (Object.keys(linkedList).length > 1) {
 		do {
 			var head= findHead(linkedList);

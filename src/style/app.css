@@ -1,0 +1,12 @@
+/* styles in src/style directory are applied to the whole page */
+.now-playing-list {
+  padding-top: 10px;
+}
+
+button > a {
+  color: #fff;
+}
+button > a:hover {
+  color: #fff;
+  text-decoration: none;
+}

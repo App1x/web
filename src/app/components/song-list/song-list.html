@@ -1,0 +1,14 @@
+<table class="table table-striped table-responsive">
+  <thead>
+    <tr>
+      <th ng-repeat="header in $ctrl.headers">{{header}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="song in $ctrl.songs">
+      <td>{{song.artists}}</td>
+      <td>{{song.name}}</td>
+      <td><i class="glyphicon glyphicon-plus"></i></td>
+    </tr>
+  </tbody>
+</table>

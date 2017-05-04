@@ -1,0 +1,10 @@
+<div>
+  <input type="text" class="form-control" ng-model="$ctrl.searchText" placeholder="Search by track" />
+  <button class="btn btn-info" ng-click="$ctrl.search()">Search</button>
+  <button class="btn btn-default">Clear</button>
+  <h3>Song List</h3>
+  <dj-song-list
+    headers="['Song', 'Artist', '']"
+    songs="$ctrl.searchResults">
+  </dj-song-list>
+</div>

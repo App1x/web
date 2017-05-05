@@ -1,6 +1,6 @@
 import angular from 'angular';
 import ngRoute from 'angular-route';
-import * as firebase from 'firebase';
+import angularfire from 'angularfire';
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -8,7 +8,7 @@ import 'bootstrap/dist/js/bootstrap';
 import '../style/app.css';
 
 // Config
-import { configRoutes } from './config';
+import { configRoutes, configureFirebase } from './config';
 
 // Services
 import services from './services';
@@ -16,7 +16,6 @@ import services from './services';
 // Components
 import LoginComponent from './login/login';
 import NowPlayingComponent from './now-playing/now-playing';
-import PlayerComponent from './player/player';
 import UserComponent from './user/user';
 import SettingsComponent from './settings/settings';
 
@@ -25,12 +24,20 @@ import components from './components';
 
 
 class AppCtrl {
-  constructor(firebase) {
-    this.url = 'https://github.com/preboot/angular-webpack';
-    this.firebase = firebase;
+  constructor($firebaseAuth, authService, partyService, $location) {
+    this.$firebaseAuth = $firebaseAuth();
+    this.auth = authService;
+  }
+
+  $onInit() {
+    // Sign in the user anonymously when they load the app
+    this.$firebaseAuth.$signInAnonymously()
+    .then(user => {
+      this.auth.user = user;
+    });
   }
 }
-AppCtrl.$inject = ['FirebaseService'];
+AppCtrl.$inject = ['$firebaseAuth', 'AuthService', '$location'];
 
 let app = {
   template: require('./app.html'),
@@ -40,8 +47,9 @@ let app = {
 
 const MODULE_NAME = 'app';
 
-angular.module(MODULE_NAME, [ngRoute])
+angular.module(MODULE_NAME, [ngRoute, angularfire])
   .config(['$routeProvider', '$locationProvider', configRoutes])
+  .config([configureFirebase])
   .component('app', app)
   .component('djLogin', LoginComponent)
   .component('djNowPlaying', NowPlayingComponent)

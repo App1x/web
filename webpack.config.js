@@ -171,7 +171,8 @@ module.exports = function makeWebpackConfig() {
     new webpack.ProvidePlugin({
       jQuery: 'jquery',
       $: 'jquery',
-      jquery: 'jquery'
+      jquery: 'jquery',
+      firebase: 'firebase'
     })
   ];
 

@@ -7,7 +7,8 @@ let SongListComponent = {
   controller: SongListCtrl,
   bindings: {
     headers: '<',
-    songs: '<'
+    songs: '<',
+    addSong: '&'
   }
 }
 

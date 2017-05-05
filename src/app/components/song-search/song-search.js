@@ -21,7 +21,10 @@ SongSearchCtrl.$inject = [ 'SearchService' ];
 
 let SongSearchComponent = {
   template: require('./song-search.html'),
-  controller: SongSearchCtrl
+  controller: SongSearchCtrl,
+  bindings: {
+    addSong: '&'
+  }
 };
 
 export default SongSearchComponent;

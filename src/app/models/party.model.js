@@ -1,7 +1,9 @@
 export class Party {
-  constructor(name, host) {
-    this.name = name;
-    this.host = host;
+  constructor(values) {
+    this.host = '';
+    this.password = '';
     this.guestList = []
+
+    Object.assign(this, values);
   }
 }

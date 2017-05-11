@@ -17,13 +17,13 @@ export class SearchService {
     })
     .then( result => result.data )
     .then(result => {
-      console.log(result);
       return result.tracks.items.map(track => {
-        return new Track({
+        return {
           name: track.name,
           artists: track.artists.map(a => a.name).join(', '),
           duration: this.getTrackDuration(track.duration_ms),
-        });
+          uri: track.uri 
+        };
       });
     });
   }

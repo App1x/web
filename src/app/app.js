@@ -1,6 +1,7 @@
 import angular from 'angular';
 import ngRoute from 'angular-route';
 import angularfire from 'angularfire';
+import ngRedux from 'ng-redux';
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -20,6 +21,10 @@ import UserComponent from './user/user';
 import SettingsComponent from './settings/settings';
 
 import components from './components';
+
+import { djparty, sessionStorageMiddleware, storageState } from './reducers';
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
 
 
 
@@ -47,9 +52,12 @@ let app = {
 
 const MODULE_NAME = 'app';
 
-angular.module(MODULE_NAME, [ngRoute, angularfire])
+angular.module(MODULE_NAME, [ngRoute, angularfire, ngRedux])
   .config(['$routeProvider', '$locationProvider', configRoutes])
   .config([configureFirebase])
+  .config(['$ngReduxProvider', ($ngReduxProvider) => {
+    $ngReduxProvider.createStoreWith(djparty, [thunk, sessionStorageMiddleware, logger], null, storageState);
+  }])
   .component('app', app)
   .component('djLogin', LoginComponent)
   .component('djNowPlaying', NowPlayingComponent)

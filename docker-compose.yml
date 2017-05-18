@@ -1,0 +1,9 @@
+# this is production version of the project
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "4567:4567"
+    command: ruby app.rb

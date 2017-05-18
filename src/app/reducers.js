@@ -34,7 +34,9 @@ const party = (state = {}, action) => {
     [partyActionsTypes.JoinPartyResolved]: addParty,
     [partyActionsTypes.FetchPartyRequested]: asyncRequestStarted,
     [partyActionsTypes.FetchPartyRejected]: asyncRequestEnded,
-    [partyActionsTypes.FetchPartyResolved]: addParty
+    [partyActionsTypes.FetchPartyResolved]: addParty,
+    [partyActionsTypes.NextSongRequested]: asyncRequestStarted,
+    [partyActionsTypes.AddSongRejected]: asyncRequestEnded
     
   }
   return reducers[action.type] ? reducers[action.type](state, action) : state;

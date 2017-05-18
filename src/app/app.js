@@ -2,6 +2,7 @@ import angular from 'angular';
 import ngRoute from 'angular-route';
 import angularfire from 'angularfire';
 import ngRedux from 'ng-redux';
+import { get } from 'lodash';
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -13,6 +14,7 @@ import { configRoutes, configureFirebase } from './config';
 
 // Services
 import services from './services';
+import { fetchParty } from './actions/party.actions';
 
 // Components
 import LoginComponent from './login/login';
@@ -27,22 +29,26 @@ import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 
 
-
+/* @ngInject */
 class AppCtrl {
-  constructor($firebaseAuth, authService, partyService, $location) {
+  constructor($firebaseAuth, $ngRedux) {
     this.$firebaseAuth = $firebaseAuth();
-    this.auth = authService;
+    this.$ngRedux = $ngRedux;
   }
 
   $onInit() {
     // Sign in the user anonymously when they load the app
-    this.$firebaseAuth.$signInAnonymously()
-    .then(user => {
-      this.auth.user = user;
+    return this.$firebaseAuth.$signInAnonymously()
+    .then(user => { /* Keep track of user */})
+    .then(() => {
+      let state = this.$ngRedux.getState();
+      let partyName = get(state.party, 'party.partyName');
+      if (partyName) {
+        return this.$ngRedux.dispatch(fetchParty(partyName));
+      } 
     });
   }
 }
-AppCtrl.$inject = ['$firebaseAuth', 'AuthService', '$location'];
 
 let app = {
   template: require('./app.html'),

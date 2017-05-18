@@ -3,7 +3,8 @@ import { Track } from '../models/track.model';
 export class SearchService {
   constructor($http) {
     this.http = $http;
-    this.spotifyUrl = 'https://api.spotify.com/v1/search'
+    this.spotifyUrl = 'https://api.spotify.com/v1/search';
+    this.youtubeUrl = 'https://www.youtube.com/results'
   }
 
   searchTrack(track, page = 1, limit = 5) {
@@ -25,6 +26,17 @@ export class SearchService {
           uri: track.uri 
         };
       });
+    });
+  }
+
+  searchVideo(track) {
+    return this.http.get(this.youtubeUrl, {
+      params: {
+        search_query: `${track.name} ${track.artists}`
+      }
+    })
+    .then(res => {
+      return {videoId: /watch\?v=(.+?)"/.exec(res.data)[1]};
     });
   }
 

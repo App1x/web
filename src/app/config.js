@@ -1,5 +1,5 @@
 import * as firebase from 'firebase';
-import { isEmpty } from 'lodash';
+import { get } from 'lodash';
 /* @ngInject */
 export function configRoutes($routeProvider, $locationProvider) {
   let originalWhen = $routeProvider.when;
@@ -7,8 +7,8 @@ export function configRoutes($routeProvider, $locationProvider) {
   // Redirect the user anytime they don't have a party
   $routeProvider.when = (path, route) => {
     route.resolveRedirectTo = ($ngRedux, $location) => {
-      let partyRef = $ngRedux.getState().party;
-      if (!partyRef) return '/';
+      let party = get($ngRedux.getState().party, 'party');
+      if (!party) return '/';
       return $location.url(); 
     };
     return originalWhen.call($routeProvider, path, route);

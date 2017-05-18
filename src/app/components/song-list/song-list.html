@@ -6,8 +6,8 @@
   </thead>
   <tbody>
     <tr ng-repeat="song in $ctrl.songs">
-      <td>{{song.artists}}</td>
       <td>{{song.name}}</td>
+      <td>{{song.artists}}</td>
       <td><i ng-click="$ctrl.addSong({song: song})" class="glyphicon glyphicon-plus"></i></td>
     </tr>
   </tbody>

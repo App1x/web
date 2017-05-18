@@ -7,7 +7,7 @@ import { addCurrentUser } from '../actions/guest.actions';
 /* @ngInject */
 class LoginCtrl {
   constructor(PartyService, $ngRedux, $location) {
-    this.partyService = PartyService
+    this.partyService = PartyService;
     this.location = $location;
     this.$ngRedux = $ngRedux;
 

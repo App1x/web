@@ -72,32 +72,20 @@ function loadCurrentlyPlaying(currentlyPlayingRef) {
 }
 
 function loadSpecificTrack(track) {
-    var url= window.location.origin + "/loadVideo"
-    $.ajax({
-        dataType: "json",
-        url: url,
-        data: {q: track.trackName+' '+track.trackArtist},
-        success: function(data) {
-            // console.log(data);
-            player.loadVideoById(data.videoId);
-        },
-        error: function(data) {
-            console.log(data);
-        }
-    })
-
-    // var request = gapi.client.youtube.search.list({
-    //     q: track.trackName+' '+track.trackArtist,
-    //     part: 'id, snippet',
-    //     type: 'video',
-    //     // topicId: '/m/04rlf',
-    //     // videoCategoryId: 10, //music
-    //     safeSearch: 'none'
-    // });
-
-    // request.execute(function(response) {
-    //     player.loadVideoById(response.items[0].id.videoId);
-    // });
+    player.loadVideoById(track.trackUri);
+    // var url= window.location.origin + "/loadVideo"
+    // $.ajax({
+    //     dataType: "json",
+    //     url: url,
+    //     data: {q: track.trackName+' '+track.trackArtist},
+    //     success: function(data) {
+    //         // console.log(data);
+    //         player.loadVideoById(data.videoId);
+    //     },
+    //     error: function(data) {
+    //         console.log(data);
+    //     }
+    // })
 }
 
 

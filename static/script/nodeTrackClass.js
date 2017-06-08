@@ -78,7 +78,7 @@ function removeNode(linkedList, node) {
 	return linkedList;
 }
 
-function cycleNodes(linkedList, nextUp) {
+function cycleNodes(linkedList, nextUp=null) {
 	if (Object.keys(linkedList).length > 1) {
 		do {
 			var head= findHead(linkedList);
@@ -100,11 +100,12 @@ function cycleNodes(linkedList, nextUp) {
 //end class Node
 
 //class Track
-function Track(trackUri, trackName, trackArtist, trackDuration) {
+function Track(trackUri, videoId, trackName, trackArtist, trackDuration) {
 	Node.call(this, trackUri);
-	this.trackUri= trackUri;
-	this.trackName= trackName;
-	this.trackArtist= trackArtist;
+	this.trackUri     = trackUri;
+	this.videoId      = videoId;
+	this.trackName    = trackName;
+	this.trackArtist  = trackArtist;
 	this.trackDuration= trackDuration;
 
 	var nameElement= jQuery('<span/>', {

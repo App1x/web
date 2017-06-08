@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
-ruby '2.3.0'
-gem "sinatra"
+# ruby '2.3.0'
+ruby '2.4.1'
 gem "haml"
-# gem "net/http"
 gem "json"
+# gem "net/http"
+gem 'nokogiri'
+gem "sinatra"

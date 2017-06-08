@@ -1,14 +1,14 @@
 
-var party= null;
-var guestList= null;
-var myName= null;
-var myStuff= null;
-var myPlaylist= null;
+var party 	   = null;
+var guestList  = null;
+var myName 	   = null;
+var myStuff 	 = null;
+var myPlaylist = null;
 
-var noSongPlaying= true;
-var amPartyHost= false;
-var amSongOwner= false;
-var nowPlaying= null;
+var noSongPlaying = true;
+var amPartyHost   = false;
+var amSongOwner   = false;
+var nowPlaying 	  = null;
 
 function show_login_page() {
 	if (party) leave_party();
@@ -79,13 +79,13 @@ function leave_party() {
 		myPlaylist.off('value');
 		guestList.off('value');
 
-		party= null;
-		guestList= null;
-		myName= null;
-		myStuff= null;
-		myPlaylist= null;
+		party      = null;
+		guestList  = null;
+		myName 	   = null;
+		myStuff 	 = null;
+		myPlaylist = null;
 
-		noSongPlaying= true;
+		noSongPlaying = true;
 
 		// show_login_page();
 	})
@@ -163,11 +163,12 @@ function create_or_join_party(partyName, password, guestName) {
 			if (party.password!==password) {  //abort if password doesn't match
 				$('#partyname').val("");
 				$('#partyname').attr("placeholder", "Party name already exists");
+				got_in= false;
 				return;
 			}
 			amPartyHost= party.host===guestName;
 		} else {
-			party= {guestList: {}, password: password};  //create new party
+			party= {guestList: {}, password: password, host:guestName};  //create new party
 			amPartyHost= true;
 		}
 
@@ -178,30 +179,28 @@ function create_or_join_party(partyName, password, guestName) {
 		return party;
 	}, function(error, committed, snapshot) {  //initialize listeners
 		if (got_in) {
-			myName= guestName;
-			party= parties.child(partyName);
-			guestList= party.child('guestList');
-			myStuff= guestList.child(guestName);
+			myName    = guestName;
+			party     = parties.child(partyName);
+			guestList = party.child('guestList');
+			myStuff	  = guestList.child(guestName);
 			myPlaylist= myStuff.child('playlist');
 
 			//save party host
-			if (amPartyHost) {
-				party.update({host: myName});
-			} else {
+			if (!amPartyHost) {
 				am_not_host();
 			}
 
 			//update my playlist
 			myPlaylist.on('value', function(data) {
-				var tracks= data.val();
-				list_html= [];
+				var tracks 	    = data.val(),
+				    list_html   = [],
+						currentTrack= findHead(tracks),
+						odd 				= 0;
 
-				var currentTrack= findHead(tracks);
-				var odd= 0;
 				while (currentTrack!=null) {
+					var nextTrackName = currentTrack.next;
 					list_html.push(track_html_listing(currentTrack, "-", 1-(++odd)===0, true));
-					var nextTrackName= currentTrack.next;
-					currentTrack= tracks[nextTrackName];
+					currentTrack      = tracks[nextTrackName];
 				}
 				
 				$("#list_my_tracks").html(html_table(track_html_listing_header(true),list_html.join("\n")));
@@ -224,11 +223,11 @@ function create_or_join_party(partyName, password, guestName) {
 				var headGuest= findHead(guest_list);
 
 				//populate next up
-				var nextUpTrack= null;
-				var nextInLine= null;
-				var list_html= [];
-				var odd= 0;
-				currentGuest= headGuest;
+				var nextUpTrack = null,
+						nextInLine 	= null,
+						list_html 	= [],
+						odd 				= 0,
+						currentGuest 		= headGuest;
 				while (currentGuest!=null) {
 					var nextTrack= findHead(currentGuest.playlist);
 					if (nextTrack) {
@@ -236,7 +235,8 @@ function create_or_join_party(partyName, password, guestName) {
 							nextUpTrack= nextTrack;
 							nextInLine= currentGuest.id;
 
-							party.update({nextUp: nextTrack.id, nextInLine: nextInLine}).then(function(data) {
+							party.update({nextUp: nextTrack.id, nextInLine: nextInLine})
+							.then(function(data) {
 								if (noSongPlaying || player.getPlayerState()==YT.PlayerState.ENDED) {
 									noSongPlaying= false;
 
@@ -288,41 +288,31 @@ function create_or_join_party(partyName, password, guestName) {
 	});
 };
 
-function search_song(track, page=1, limit=5) {
+function search_song(query, page=1, limit=5) {
 
-	var q= [];
-	// track= []
-	var type= ["track"];
-	if (track) {
-		q.push(track);
-		// type.push("track");
-	}
-
-	var url= "https://api.spotify.com/v1/search";
+	var url         = "/searchYoutube",
+			typeOfVideo = 'EgIQAQ%=%=';
 
 	$.ajax({
 		dataType: "json",
 		url: url,
-		data: {q:q.join("+"), type:type.join(","), limit:limit, offset:(limit*(page-1))},
+		data: {q:query, num_results:limit, video_type:typeOfVideo},
 		success: function(data) {
 			// console.log(data);
 
 			var songAndArtists= [];
 			var html= [];
-			$.each(data.tracks.items, function(index, track) {
-				var trackName= track.name;
-				var artists= [];
-				$.each(track.artists, function(ind, artist) {
-					artists.push(artist.name);
-				})
-				artists= artists.join(", ")
-				var uri= track.uri;
-				var duration= Math.floor((track.duration_ms/1000)/120)+':'+Math.floor((track.duration_ms/1000)%120);
+			$.each(data.results, function(index, track) {
+				var trackName  = track.title,
+						videoId 	 = track.videoId,
+						artist     = track.channel,
+						uri        = track.uri,
+						duration   = track.duration,
 
-				var newTrack= new Track(uri, trackName, artists, duration);
-				var rowElement= track_html_listing(newTrack, "+", (index+1)%2===1, false)
+						newTrack   = new Track(videoId, videoId, trackName, artist, duration),
+						rowElement = track_html_listing(newTrack, "+", (index+1)%2===1, false),
 
-				var songAndArtist= trackName + artists;
+						songAndArtist= trackName + artist;
 				if (songAndArtists.indexOf(songAndArtist)===-1) {  //if track name and artist is not already added
 					html.push(rowElement);
 					songAndArtists.push(songAndArtist);
@@ -337,6 +327,55 @@ function search_song(track, page=1, limit=5) {
 	})
 }
 
+// function search_song(track, page=1, limit=5) {
+
+// 	var q= [];
+// 	// track= []
+// 	var type= ["track"];
+// 	if (track) {
+// 		q.push(track);
+// 		// type.push("track");
+// 	}
+
+// 	var url= "https://api.spotify.com/v1/search";
+
+// 	$.ajax({
+// 		dataType: "json",
+// 		url: url,
+// 		data: {q:q.join("+"), type:type.join(","), limit:limit, offset:(limit*(page-1))},
+// 		success: function(data) {
+// 			// console.log(data);
+
+// 			var songAndArtists= [];
+// 			var html= [];
+// 			$.each(data.tracks.items, function(index, track) {
+// 				var trackName= track.name;
+// 				var artists= [];
+// 				$.each(track.artists, function(ind, artist) {
+// 					artists.push(artist.name);
+// 				})
+// 				artists= artists.join(", ")
+// 				var uri= track.uri;
+// 				var duration= Math.floor((track.duration_ms/1000)/120)+':'+Math.floor((track.duration_ms/1000)%120);
+
+// 				var newTrack= new Track(uri, trackName, artists, duration);
+// 				var rowElement= track_html_listing(newTrack, "+", (index+1)%2===1, false)
+
+// 				var songAndArtist= trackName + artists;
+// 				if (songAndArtists.indexOf(songAndArtist)===-1) {  //if track name and artist is not already added
+// 					html.push(rowElement);
+// 					songAndArtists.push(songAndArtist);
+// 				}
+// 			});
+
+// 			$("#search_results").html(html_table(track_html_listing_header(false), html));
+// 		},
+// 		error: function(error) {
+// 			console.log(error);
+// 		}
+// 	})
+// }
+
 function add_track(newTrack) {
 	newTrack= JSON.parse(newTrack);
 
@@ -350,7 +389,6 @@ function add_track(newTrack) {
 
 function remove_track(track, username=myName, cycleGuests=false) {
 	track= JSON.parse(track);
-
 
 	guestList.transaction(function(guest_list) {
 		if (guest_list) {
